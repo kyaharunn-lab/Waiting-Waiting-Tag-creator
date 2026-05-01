@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -41,7 +42,6 @@
   width: 148mm;
   height: 210mm;
   background-color: white;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
   margin: 0 auto;
   position: relative;
   overflow: hidden;
