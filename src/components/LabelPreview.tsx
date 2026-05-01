@@ -14,17 +14,13 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
       className="a5-container relative bg-white overflow-hidden shadow-none border border-zinc-200 print:border-none font-sans select-none"
       style={{ width: '148mm', height: '210mm' }}
     >
-      {/* 1. ARKA PLAN ŞABLONU (User Uploaded Template) */}
-      {data.productImage ? (
+      {/* 1. ARKA PLAN ŞABLONU */}
+      {data.productImage && (
         <img 
           src={data.productImage} 
           alt="Etiket Şablonu" 
           className="absolute inset-0 w-full h-full object-fill z-0" 
         />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 text-zinc-300 text-sm italic z-0">
-          Lütfen boş bir etiket şablonu yükleyin
-        </div>
       )}
 
       {/* 2. DİNAMİK EDİTLENEBİLİR KATMAN (Overlay Layer) */}
@@ -32,7 +28,7 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
         
         {/* ÜRÜN BAŞLIĞI - Siyah Bar */}
         <div 
-          className="absolute left-[8%] right-[8%] flex items-center justify-center bg-[#252525] print:bg-[#252525]" 
+          className="absolute left-[8%] right-[8%] flex items-center justify-center bg-[#252525]" 
           style={{ top: '37.2%', height: '36px' }}
         >
           <h2 className="text-white font-bold uppercase tracking-tight leading-none text-center" style={{ fontSize: '20px', fontFamily: 'Arial, sans-serif' }}>
@@ -42,7 +38,7 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
 
         {/* FİYAT ALANI - Gri Kutu */}
         <div 
-          className="absolute left-[8%] right-[8%] grid grid-cols-2 bg-[#ded8d5] print:bg-[#ded8d5]" 
+          className="absolute left-[8%] right-[8%] grid grid-cols-2 bg-[#ded8d5]" 
           style={{ top: '46%', height: '56px' }}
         >
           {/* Peşin Fiyat */}
@@ -68,7 +64,7 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
         >
           <table className="w-full border-collapse text-[11px] font-bold text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
             <thead>
-              <tr className="bg-[#d8d0cc] print:bg-[#d8d0cc]">
+              <tr className="bg-[#d8d0cc]">
                 <th className="border-[1.5px] border-black h-[22px] text-center uppercase px-1" style={{ width: '36%' }}>ÜRÜN</th>
                 <th className="border-[1.5px] border-black h-[22px] text-center uppercase" style={{ width: '9%' }}>ADET</th>
                 <th className="border-[1.5px] border-black h-[22px] text-center uppercase" style={{ width: '13%' }}>PEŞİN</th>
@@ -80,25 +76,25 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
             </thead>
             <tbody>
               {/* Dinamik Veri Satırı */}
-              <tr className="bg-white/40">
-                <td className="border-[1.5px] border-black h-[30px] px-2 text-left truncate">{data.tableProductName}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center">{data.quantity}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center">{data.tableCashPrice}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center">{data.tableInstallmentPrice}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center">{data.gen}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center">{data.der}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center">{data.yuk}</td>
+              <tr>
+                <td className="border-[1.5px] border-black h-[30px] px-2 text-left truncate bg-white/40">{data.tableProductName}</td>
+                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.quantity}</td>
+                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.tableCashPrice}</td>
+                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.tableInstallmentPrice}</td>
+                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.gen}</td>
+                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.der}</td>
+                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.yuk}</td>
               </tr>
-              {/* Boş Satırlar (Görseldeki gibi 4 adet) */}
+              {/* Boş Satırlar */}
               {[...Array(4)].map((_, i) => (
-                <tr key={i} className="bg-white/20">
-                  <td className="border-[1.5px] border-black h-[30px]"></td>
-                  <td className="border-[1.5px] border-black h-[30px]"></td>
-                  <td className="border-[1.5px] border-black h-[30px]"></td>
-                  <td className="border-[1.5px] border-black h-[30px]"></td>
-                  <td className="border-[1.5px] border-black h-[30px]"></td>
-                  <td className="border-[1.5px] border-black h-[30px]"></td>
-                  <td className="border-[1.5px] border-black h-[30px]"></td>
+                <tr key={i}>
+                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
+                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
+                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
+                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
+                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
+                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
+                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
                 </tr>
               ))}
             </tbody>

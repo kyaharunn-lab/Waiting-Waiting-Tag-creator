@@ -1,4 +1,11 @@
 
+export interface ExcelProduct {
+  productName: string;
+  quantity: string;
+  cashPrice: string;
+  installmentPrice: string;
+}
+
 export interface LabelData {
   productTitle: string;
   totalCashPrice: string;
@@ -10,7 +17,7 @@ export interface LabelData {
   gen: string;
   der: string;
   yuk: string;
-  productImage?: string; // Kullanıcının yükleyebileceği görsel için
+  productImage?: string;
 }
 
 export const initialLabelData: LabelData = {
