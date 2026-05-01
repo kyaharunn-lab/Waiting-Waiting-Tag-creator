@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { LabelData } from '@/lib/types';
+import { parsePrice, formatPrice } from '@/lib/utils';
 
 interface LabelPreviewProps {
   data: LabelData;
@@ -87,22 +88,27 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
               </tr>
             </thead>
             <tbody>
-              {data.tableRows.map((row, index) => (
-                <tr key={index} className="bg-white/40">
-                  <td className="border-[1.5px] border-black h-[24px] px-2 text-left truncate">
-                    {row.productName}
-                  </td>
-                  <td className="border-[1.5px] border-black h-[24px] text-center">
-                    {row.quantity}
-                  </td>
-                  <td className="border-[1.5px] border-black h-[24px] text-center whitespace-nowrap">
-                    {row.cashPrice} ₺
-                  </td>
-                  <td className="border-[1.5px] border-black h-[24px] text-center whitespace-nowrap">
-                    {row.installmentPrice} ₺
-                  </td>
-                </tr>
-              ))}
+              {data.tableRows.map((row, index) => {
+                const totalCash = parsePrice(row.cashPrice) * row.quantity;
+                const totalInstallment = parsePrice(row.installmentPrice) * row.quantity;
+                
+                return (
+                  <tr key={index} className="bg-white/40">
+                    <td className="border-[1.5px] border-black h-[24px] px-2 text-left truncate">
+                      {row.productName}
+                    </td>
+                    <td className="border-[1.5px] border-black h-[24px] text-center">
+                      {row.quantity}
+                    </td>
+                    <td className="border-[1.5px] border-black h-[24px] text-center whitespace-nowrap">
+                      {formatPrice(totalCash)} ₺
+                    </td>
+                    <td className="border-[1.5px] border-black h-[24px] text-center whitespace-nowrap">
+                      {formatPrice(totalInstallment)} ₺
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

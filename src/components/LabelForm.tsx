@@ -9,15 +9,14 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { 
   Upload, X, FileSpreadsheet, Search, Trash2, Plus, 
-  CheckCircle2, AlertCircle, Checkbox as CheckboxIcon, 
-  CheckSquare, Square, ListPlus, RotateCcw, MousePointer2 
+  CheckCircle2, AlertCircle, ListPlus, MousePointer2 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import * as XLSX from 'xlsx';
 import { toast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { cn, parsePrice, formatPrice } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface LabelFormProps {
@@ -50,35 +49,24 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const formatTurkishNumber = (val: any): string => {
+  const cleanAndFormatExcelPrice = (val: any): string => {
     if (val === undefined || val === null || val === '') return '';
     let cleanVal = val.toString().replace(/\s/g, '').replace('₺', '');
     if (cleanVal.includes(',')) {
-      cleanVal = cleanVal.replace(/\./g, '').replace(',', '.');
+      cleanVal = cleanVal.split(',')[0].replace(/\./g, '');
     } else {
       cleanVal = cleanVal.replace(/\./g, '');
     }
     const num = parseFloat(cleanVal);
     if (isNaN(num)) return val.toString();
-    return new Intl.NumberFormat('tr-TR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(num);
-  };
-
-  const parsePrice = (val: string | undefined): number => {
-    if (!val) return 0;
-    const cleanVal = val.toString()
-      .replace(/[₺\s\.]/g, '')
-      .replace(',', '.');
-    return parseFloat(cleanVal) || 0;
+    return formatPrice(num);
   };
 
   const tableTotals = useMemo(() => {
     return data.tableRows.reduce((acc, row) => {
       return {
-        cash: acc.cash + parsePrice(row.cashPrice),
-        installment: acc.installment + parsePrice(row.installmentPrice)
+        cash: acc.cash + (parsePrice(row.cashPrice) * row.quantity),
+        installment: acc.installment + (parsePrice(row.installmentPrice) * row.quantity)
       };
     }, { cash: 0, installment: 0 });
   }, [data.tableRows]);
@@ -120,7 +108,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         }
 
         const products: ExcelProduct[] = dataRows.slice(1).map(row => {
-          // A:0 (Ürün), C:2 (Peşin), D:3 (Taksit)
           const name = row[0] || "";
           const cash = row[2] || "";
           const installment = row[3] || "";
@@ -128,8 +115,8 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
           return {
             productName: name.toString().trim(),
             quantity: "1",
-            cashPrice: formatTurkishNumber(cash),
-            installmentPrice: formatTurkishNumber(installment)
+            cashPrice: cleanAndFormatExcelPrice(cash),
+            installmentPrice: cleanAndFormatExcelPrice(installment)
           };
         }).filter(p => p.productName);
 
@@ -208,7 +195,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
     const productsToAdd = Array.from(selectedIndices).map(idx => excelProducts[idx]);
     const newRows = [...data.tableRows, ...productsToAdd.map(p => ({
       productName: p.productName,
-      quantity: "1",
+      quantity: 1,
       cashPrice: p.cashPrice,
       installmentPrice: p.installmentPrice
     }))];
@@ -223,6 +210,14 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
       title: "Ürünler Eklendi",
       description: `${productsToAdd.length} ürün tabloya başarıyla eklendi.`,
     });
+  };
+
+  const updateRowQuantity = (index: number, quantity: number) => {
+    const safeQuantity = Math.max(1, quantity);
+    const newRows = data.tableRows.map((row, i) => 
+      i === index ? { ...row, quantity: safeQuantity } : row
+    );
+    onChange({ ...data, tableRows: newRows });
   };
 
   const removeRow = (index: number) => {
@@ -289,7 +284,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         <Separator />
 
         <div className="space-y-3">
-          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Excel Ürün Listesi (A:Ürün, C:Peşin, D:Taksit)</Label>
+          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Vize Excel Ürün Seçimi</Label>
           
           <div 
             className={cn(
@@ -461,22 +456,37 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
             </div>
             <div className="space-y-1 max-h-[300px] overflow-auto pr-1">
               {data.tableRows.map((row, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2.5 bg-white border border-zinc-200 group hover:border-[#9f2732]/30 transition-all">
-                  <div className="truncate flex-1 pr-2">
-                    <div className="font-bold text-zinc-700 text-[10px] uppercase truncate">{row.productName}</div>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-[9px] font-bold text-[#9f2732]">PEŞİN: {row.cashPrice} ₺</span>
-                      <span className="text-[9px] font-bold text-zinc-400">TAKSİT: {row.installmentPrice} ₺</span>
+                <div key={idx} className="flex flex-col p-2.5 bg-white border border-zinc-200 group hover:border-[#9f2732]/30 transition-all">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="truncate flex-1">
+                      <div className="font-bold text-zinc-700 text-[10px] uppercase truncate">{row.productName}</div>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <span className="text-[9px] font-bold text-[#9f2732]">Birim P: {row.cashPrice} ₺</span>
+                        <span className="text-[9px] font-bold text-zinc-400">Birim T: {row.installmentPrice} ₺</span>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => removeRow(idx)} 
+                      className="h-7 w-7 text-zinc-300 hover:text-red-500 hover:bg-red-50 shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-100">
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase">Adet:</span>
+                    <Input 
+                      type="number" 
+                      min="1" 
+                      value={row.quantity} 
+                      onChange={(e) => updateRowQuantity(idx, parseInt(e.target.value) || 1)}
+                      className="h-7 w-16 text-[10px] rounded-none focus-visible:ring-[#9f2732]"
+                    />
+                    <div className="ml-auto text-right">
+                       <div className="text-[9px] font-bold text-[#9f2732]">Toplam P: {formatPrice(parsePrice(row.cashPrice) * row.quantity)} ₺</div>
                     </div>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => removeRow(idx)} 
-                    className="h-7 w-7 text-zinc-300 hover:text-red-500 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
                 </div>
               ))}
             </div>
@@ -534,13 +544,13 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
             <div className="space-y-1">
               <span className="text-[9px] uppercase font-bold text-zinc-400">Toplam Peşin</span>
               <div className="text-sm font-bold text-zinc-800 tabular-nums">
-                {new Intl.NumberFormat('tr-TR').format(tableTotals.cash)} ₺
+                {formatPrice(tableTotals.cash)} ₺
               </div>
             </div>
             <div className="space-y-1">
               <span className="text-[9px] uppercase font-bold text-zinc-400">Toplam Taksit</span>
               <div className="text-sm font-bold text-zinc-800 tabular-nums">
-                {new Intl.NumberFormat('tr-TR').format(tableTotals.installment)} ₺
+                {formatPrice(tableTotals.installment)} ₺
               </div>
             </div>
           </div>

@@ -8,9 +8,9 @@ export interface ExcelProduct {
 
 export interface TableRow {
   productName: string;
-  quantity: string;
-  cashPrice: string;
-  installmentPrice: string;
+  quantity: number;
+  cashPrice: string; // Birim peşin fiyatı saklar
+  installmentPrice: string; // Birim taksitli fiyatı saklar
 }
 
 export interface LabelData {
