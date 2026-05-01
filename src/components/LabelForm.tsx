@@ -31,23 +31,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
     return new Intl.NumberFormat('tr-TR').format(num);
   };
 
-  const calculateTotals = (rows: TableRow[]) => {
-    const cashTotal = rows.reduce((acc, row) => {
-      const val = parseFloat(row.cashPrice.replace(/\./g, '').replace(',', '.'));
-      return acc + (isNaN(val) ? 0 : val);
-    }, 0);
-
-    const instTotal = rows.reduce((acc, row) => {
-      const val = parseFloat(row.installmentPrice.replace(/\./g, '').replace(',', '.'));
-      return acc + (isNaN(val) ? 0 : val);
-    }, 0);
-
-    return {
-      cash: new Intl.NumberFormat('tr-TR').format(cashTotal),
-      inst: new Intl.NumberFormat('tr-TR').format(instTotal)
-    };
-  };
-
   const handleManualChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     onChange({ ...data, [name]: value });
@@ -116,13 +99,10 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
       }
     ];
 
-    const totals = calculateTotals(newRows);
-
+    // Otomatik toplam hesaplama kaldırıldı, sadece satırlar güncelleniyor
     onChange({
       ...data,
-      tableRows: newRows,
-      totalCashPrice: totals.cash,
-      totalInstallmentPrice: totals.inst
+      tableRows: newRows
     });
     setSearchTerm('');
     setShowDropdown(false);
@@ -130,12 +110,11 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
   const removeRow = (index: number) => {
     const newRows = data.tableRows.filter((_, i) => i !== index);
-    const totals = calculateTotals(newRows);
+    
+    // Otomatik toplam hesaplama kaldırıldı, sadece satırlar güncelleniyor
     onChange({
       ...data,
-      tableRows: newRows,
-      totalCashPrice: totals.cash,
-      totalInstallmentPrice: totals.inst
+      tableRows: newRows
     });
   };
 
