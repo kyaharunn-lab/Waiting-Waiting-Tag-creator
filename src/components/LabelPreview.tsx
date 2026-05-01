@@ -11,114 +11,170 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
   return (
     <div className="a5-container relative bg-white overflow-hidden shadow-none border border-zinc-200 print:border-none font-sans select-none">
       
-      {/* 1. KIRMIZI ÜST ALAN (HEADER) */}
-      <div className="relative h-[34%] w-full bg-[#9f2732] flex flex-col items-center justify-start pt-6">
-        {/* Beyaz Dairesel Kesik Detayı */}
-        <div className="absolute top-0 left-0 w-12 h-12 bg-white rounded-br-full" />
-        <div className="absolute top-0 right-0 w-12 h-12 bg-white rounded-bl-full" />
+      {/* 1. ÜST MARKA ALANI (HEADER) - Görseldeki Çok Katmanlı Yapı */}
+      <div className="relative h-[36%] w-full overflow-hidden">
+        {/* Koyu Bordo Üst Katman */}
+        <div className="absolute top-0 left-0 w-full h-full bg-[#8a191e]" />
         
-        {/* LOGO ALANI */}
-        <div className="flex flex-col items-end">
-          <h1 className="text-white font-black italic tracking-tighter leading-none" style={{ fontSize: '72px' }}>
-            vize
-          </h1>
-          <span className="text-white font-bold tracking-widest -mt-2 uppercase" style={{ fontSize: '14px' }}>
-            home
-          </span>
+        {/* Kırmızı Dairesel Alan */}
+        <div className="absolute top-[10%] left-[-10%] w-[120%] h-[90%] bg-[#d82027] rounded-b-[50%] shadow-lg" />
+        
+        {/* Üst Orta Üçgen Detay */}
+        <div 
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[40px] border-l-transparent border-r-[40px] border-r-transparent border-t-[40px] border-t-[#8a191e]" 
+        />
+
+        {/* LOGO: vize home */}
+        <div className="absolute top-10 left-0 w-full flex flex-col items-center">
+          <div className="relative">
+            <h1 className="text-white font-black italic tracking-tighter leading-none" style={{ fontSize: '92px' }}>
+              vize
+              <span className="absolute -top-1 -right-4 text-[14px] font-bold">®</span>
+            </h1>
+            <div className="w-full text-right -mt-4 pr-2">
+              <span className="text-white font-medium tracking-widest text-xl">home</span>
+            </div>
+          </div>
         </div>
 
-        {/* KOLTUK İLLÜSTRASYONU (Sade Çizim) */}
-        <div className="mt-4 opacity-90">
-          <svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M10 40H110V50H10V40Z" fill="white"/>
-             <path d="M15 25C15 20 25 15 35 15H85C95 15 105 20 105 25V40H15V25Z" fill="white"/>
-             <path d="M5 25H15V40H5V25Z" fill="white"/>
-             <path d="M105 25H115V40H105V25Z" fill="white"/>
-             <circle cx="95" cy="10" r="4" fill="white"/>
-             <line x1="95" y1="14" x2="95" y2="25" stroke="white" strokeWidth="2"/>
-          </svg>
+        {/* İLLÜSTRASYON: Koltuk ve Lamba */}
+        <div className="absolute bottom-4 left-0 w-full flex items-end justify-center px-8">
+           {/* Lamba */}
+           <div className="absolute left-16 bottom-4 flex flex-col items-center">
+              <div className="w-10 h-10 bg-white rounded-sm shadow-sm" />
+              <div className="w-0.5 h-16 bg-[#4a2a24]" />
+              <div className="w-8 h-3 bg-[#4a2a24] clip-path-trapezoid" style={{ clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)' }} />
+           </div>
+
+           {/* Koltuk */}
+           <div className="relative z-10 w-[240px]">
+              <svg viewBox="0 0 240 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Koltuk Ayakları */}
+                <path d="M40 85L35 95H45L40 85Z" fill="#4a2a24"/>
+                <path d="M200 85L195 95H205L200 85Z" fill="#4a2a24"/>
+                <rect x="30" y="80" width="180" height="6" fill="#4a2a24"/>
+                {/* Ana Gövde */}
+                <rect x="20" y="40" width="200" height="40" fill="white" stroke="#9f2732" strokeWidth="1"/>
+                <path d="M20 40C20 30 35 20 50 20H190C205 20 220 30 220 40V70H20V40Z" fill="white" stroke="#9f2732" strokeWidth="1"/>
+                {/* Yastık Detayları (Pembe Yarım Daireler) */}
+                <path d="M60 20C60 35 100 35 100 20H60Z" fill="#f8b4b4" stroke="#9f2732" strokeWidth="0.5"/>
+                <path d="M140 20C140 35 180 35 180 20H140Z" fill="#f8b4b4" stroke="#9f2732" strokeWidth="0.5"/>
+                {/* Yan kollar */}
+                <circle cx="25" cy="45" r="8" fill="white" stroke="#9f2732" strokeWidth="1"/>
+                <circle cx="215" cy="45" r="8" fill="white" stroke="#9f2732" strokeWidth="1"/>
+                {/* Orta Çizgi */}
+                <line x1="120" y1="40" x2="120" y2="80" stroke="#9f2732" strokeWidth="1"/>
+              </svg>
+           </div>
+        </div>
+
+        {/* Halı Çizgileri */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-4 overflow-hidden flex gap-1 opacity-40">
+           {[...Array(30)].map((_, i) => (
+             <div key={i} className="w-1 h-full bg-[#9f2732] rotate-12" />
+           ))}
         </div>
       </div>
 
-      {/* 2. BEYAZ ORTA ALAN & ÜRÜN BAŞLIĞI */}
-      <div className="flex flex-col items-center w-full mt-10">
-        {/* Siyah Başlık Barı */}
-        <div className="w-[84%] bg-[#1a1a1a] py-2 px-4 flex items-center justify-center">
-          <h2 className="text-white font-bold uppercase text-center truncate leading-tight" style={{ fontSize: '20px', letterSpacing: '0.05em' }}>
+      {/* 2. ÜRÜN BAŞLIĞI (SİYAH BAR) */}
+      <div className="w-full flex justify-center mt-12">
+        <div className="w-[88%] bg-[#1a1a1a] py-2.5 px-4">
+          <h2 className="text-white font-bold uppercase text-center truncate tracking-wide" style={{ fontSize: '24px' }}>
             {data.productTitle}
           </h2>
         </div>
+      </div>
 
-        {/* Fiyat Kutusu (Gri Alan) */}
-        <div className="w-[84%] mt-2 bg-[#ded8d5] flex border border-zinc-300">
-          <div className="flex-1 p-3 border-r border-zinc-300 flex flex-col items-center">
-            <span className="text-[10px] font-bold text-zinc-600 uppercase mb-1">Peşin Fiyat</span>
-            <div className="text-[#9f2732] font-black" style={{ fontSize: '32px' }}>
-              {data.totalCashPrice} <span className="text-xl">₺</span>
-            </div>
+      {/* 3. FİYAT KUTUSU (GRİ ALAN) */}
+      <div className="w-[88%] mx-auto mt-2 bg-[#ded8d5] flex">
+        <div className="flex-1 p-4 border-r border-white/50 flex flex-col items-center">
+          <span className="text-[12px] font-bold text-zinc-600 uppercase mb-1">Peşin Fiyat</span>
+          <div className="text-[#1a1a1a] font-black flex items-baseline gap-1" style={{ fontSize: '38px' }}>
+            {data.totalCashPrice} <span className="text-2xl font-bold">₺</span>
           </div>
-          <div className="flex-1 p-3 flex flex-col items-center">
-            <span className="text-[10px] font-bold text-zinc-600 uppercase mb-1">Taksitli Fiyat</span>
-            <div className="text-[#9f2732] font-black" style={{ fontSize: '32px' }}>
-              {data.totalInstallmentPrice} <span className="text-xl">₺</span>
-            </div>
+        </div>
+        <div className="flex-1 p-4 flex flex-col items-center">
+          <span className="text-[12px] font-bold text-zinc-600 uppercase mb-1">Taksitli Fiyat</span>
+          <div className="text-[#1a1a1a] font-black flex items-baseline gap-1" style={{ fontSize: '38px' }}>
+            {data.totalInstallmentPrice} <span className="text-2xl font-bold">₺</span>
           </div>
         </div>
       </div>
 
-      {/* 3. TABLO (EXCEL TARZI) */}
-      <div className="w-[92%] mx-auto mt-8 overflow-hidden">
-        <table className="w-full border-collapse border border-zinc-800 text-[11px] uppercase">
+      {/* 4. TABLO (EXCEL GÖRÜNÜMÜ) */}
+      <div className="w-[94%] mx-auto mt-8">
+        <table className="w-full border-collapse border border-zinc-800 text-[12px] uppercase">
           <thead>
-            <tr className="bg-[#ded8d5]">
-              <th className="border border-zinc-800 p-1 text-left w-[35%] font-bold">Ürün</th>
-              <th className="border border-zinc-800 p-1 text-center font-bold">Adet</th>
-              <th className="border border-zinc-800 p-1 text-center font-bold">Peşin</th>
-              <th className="border border-zinc-800 p-1 text-center font-bold">Taksit</th>
-              <th className="border border-zinc-800 p-1 text-center font-bold">Gen</th>
-              <th className="border border-zinc-800 p-1 text-center font-bold">Der</th>
-              <th className="border border-zinc-800 p-1 text-center font-bold">Yük</th>
+            <tr className="bg-[#bcbcbc]">
+              <th className="border border-zinc-800 p-1.5 text-center font-bold w-[35%]">Ürün</th>
+              <th className="border border-zinc-800 p-1.5 text-center font-bold">Adet</th>
+              <th className="border border-zinc-800 p-1.5 text-center font-bold">Peşin</th>
+              <th className="border border-zinc-800 p-1.5 text-center font-bold">Taksit</th>
+              <th className="border border-zinc-800 p-1.5 text-center font-bold">Gen</th>
+              <th className="border border-zinc-800 p-1.5 text-center font-bold">Der</th>
+              <th className="border border-zinc-800 p-1.5 text-center font-bold">Yük</th>
             </tr>
           </thead>
           <tbody>
-            {/* Dinamik Veri Satırı */}
-            <tr>
-              <td className="border border-zinc-800 p-1 font-medium truncate">{data.tableProductName}</td>
-              <td className="border border-zinc-800 p-1 text-center">{data.quantity}</td>
-              <td className="border border-zinc-800 p-1 text-center">{data.tableCashPrice}</td>
-              <td className="border border-zinc-800 p-1 text-center">{data.tableInstallmentPrice}</td>
-              <td className="border border-zinc-800 p-1 text-center">{data.gen}</td>
-              <td className="border border-zinc-800 p-1 text-center">{data.der}</td>
-              <td className="border border-zinc-800 p-1 text-center">{data.yuk}</td>
+            {/* Dinamik Veri */}
+            <tr className="h-8">
+              <td className="border border-zinc-800 px-2 font-medium truncate">{data.tableProductName}</td>
+              <td className="border border-zinc-800 text-center">{data.quantity}</td>
+              <td className="border border-zinc-800 text-center">{data.tableCashPrice}</td>
+              <td className="border border-zinc-800 text-center">{data.tableInstallmentPrice}</td>
+              <td className="border border-zinc-800 text-center">{data.gen}</td>
+              <td className="border border-zinc-800 text-center">{data.der}</td>
+              <td className="border border-zinc-800 text-center">{data.yuk}</td>
             </tr>
-            {/* Boş Satırlar (Excel Görünümü İçin) */}
-            {[1, 2, 3, 4].map((i) => (
-              <tr key={i} className="h-6">
-                <td className="border border-zinc-800 p-1"></td>
-                <td className="border border-zinc-800 p-1"></td>
-                <td className="border border-zinc-800 p-1"></td>
-                <td className="border border-zinc-800 p-1"></td>
-                <td className="border border-zinc-800 p-1"></td>
-                <td className="border border-zinc-800 p-1"></td>
-                <td className="border border-zinc-800 p-1"></td>
+            {/* Boş Excel Satırları */}
+            {[...Array(5)].map((_, i) => (
+              <tr key={i} className="h-8 bg-zinc-50/50">
+                <td className="border border-zinc-800"></td>
+                <td className="border border-zinc-800"></td>
+                <td className="border border-zinc-800"></td>
+                <td className="border border-zinc-800"></td>
+                <td className="border border-zinc-800"></td>
+                <td className="border border-zinc-800"></td>
+                <td className="border border-zinc-800"></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* 4. ALT ÖDEME ŞERİDİ (FOOTER) */}
-      <div className="absolute bottom-0 left-0 w-full h-10 bg-[#9f2732] flex items-center justify-between px-6 text-white">
-        <div className="flex items-center gap-4 text-[9px] font-bold">
-          <span>MasterCard</span>
-          <span>VISA</span>
-          <span>AMERICAN EXPRESS</span>
-          <span className="italic">troy</span>
+      {/* 5. ALT ÖDEME ŞERİDİ (FOOTER) */}
+      <div className="absolute bottom-0 left-0 w-full h-14 bg-[#d82027] flex items-center justify-between px-10">
+        <div className="flex items-center gap-6">
+          {/* Mastercard Placeholder */}
+          <div className="flex items-center gap-1 opacity-90">
+             <div className="w-5 h-5 bg-white/20 rounded-full" />
+             <div className="w-5 h-5 bg-white/20 rounded-full -ml-3" />
+             <span className="text-[10px] text-white font-bold ml-1">mastercard</span>
+          </div>
+          {/* VISA */}
+          <span className="text-white font-black italic text-xl tracking-tighter">VISA</span>
+          {/* AMEX */}
+          <div className="flex flex-col items-center">
+             <span className="text-[8px] text-white font-bold leading-none">AMERICAN</span>
+             <span className="text-[10px] text-white font-black leading-none">EXPRESS</span>
+          </div>
+          {/* troy */}
+          <div className="flex items-center gap-1">
+             <span className="text-white font-black italic text-2xl">troy</span>
+             <span className="text-[8px] text-white/70">®</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-black uppercase tracking-tight italic">Elden Taksit</span>
-          <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center">
-            <div className="w-3 h-3 border-2 border-[#9f2732] rounded-full" />
+
+        {/* Elden Taksit Bölümü */}
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col items-end">
+            <span className="text-white font-black uppercase italic leading-none" style={{ fontSize: '18px' }}>Elden Taksit</span>
+            <span className="text-white/70 text-[8px] font-bold uppercase tracking-widest">vize home güvencesiyle</span>
+          </div>
+          <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-white rounded-full flex items-center justify-center">
+               <div className="w-2 h-2 bg-white rounded-full" />
+            </div>
           </div>
         </div>
       </div>
