@@ -16,6 +16,7 @@ export default function Home() {
   };
 
   const handlePrint = () => {
+    alert("Yazdır butonuna basıldı! Yazdırma ekranı açılıyor...");
     console.log("PRINT CLICKED");
     window.print();
   };
@@ -43,15 +44,20 @@ export default function Home() {
       </aside>
 
       {/* Main Panel - Preview */}
-      <main className="flex-1 p-8 md:p-12 overflow-auto flex items-start justify-center print:p-0 print:bg-white">
-        <div className="flex flex-col items-center gap-6 print:w-full print:m-0">
-             <div className="w-[148mm] flex justify-between items-end px-2 print:hidden mb-2">
+      <main className="flex-1 p-8 md:p-12 overflow-auto flex items-start justify-center print:p-0 print:bg-white relative">
+        <div className="flex flex-col items-center gap-6 print:w-full print:m-0 relative z-10">
+             <div className="w-[148mm] flex justify-between items-end px-2 print:hidden mb-2 relative z-50">
                <div>
                  <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Canlı Önizleme</h2>
                  <p className="text-[10px] text-zinc-400">A5 Dikey (148mm x 210mm)</p>
                </div>
                <div className="flex gap-2">
-                 <Button variant="outline" size="sm" onClick={handleReset} className="h-8 text-[10px] uppercase font-bold rounded-none border-zinc-300">
+                 <Button 
+                   variant="outline" 
+                   size="sm" 
+                   onClick={handleReset} 
+                   className="h-8 text-[10px] uppercase font-bold rounded-none border-zinc-300"
+                 >
                     <RotateCcw className="w-3 h-3 mr-1" />
                     Sıfırla
                  </Button>
@@ -59,7 +65,8 @@ export default function Home() {
                    type="button" 
                    size="sm" 
                    onClick={handlePrint} 
-                   className="h-8 text-[10px] uppercase font-bold bg-[#9f2732] hover:bg-[#832029] rounded-none cursor-pointer"
+                   className="h-8 text-[10px] uppercase font-bold bg-[#9f2732] hover:bg-[#832029] rounded-none cursor-pointer relative z-[9999]"
+                   style={{ pointerEvents: 'auto' }}
                  >
                     <Printer className="w-3 h-3 mr-1" />
                     Yazdır / PDF
