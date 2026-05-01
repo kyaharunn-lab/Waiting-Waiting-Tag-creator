@@ -14,9 +14,6 @@ export interface LabelData {
   quantity: string;
   tableCashPrice: string;
   tableInstallmentPrice: string;
-  gen: string;
-  der: string;
-  yuk: string;
   productImage?: string;
 }
 
@@ -28,7 +25,4 @@ export const initialLabelData: LabelData = {
   quantity: "1",
   tableCashPrice: "90.000",
   tableInstallmentPrice: "120.000",
-  gen: "230",
-  der: "95",
-  yuk: "85",
 };

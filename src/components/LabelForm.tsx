@@ -218,21 +218,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
               <Input id="tableInstallmentPrice" name="tableInstallmentPrice" value={data.tableInstallmentPrice} onChange={handleChange} className="rounded-none h-9 text-sm" />
             </div>
           </div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <div className="grid gap-2">
-              <Label htmlFor="gen" className="text-[10px] uppercase font-bold text-zinc-400">GEN</Label>
-              <Input id="gen" name="gen" value={data.gen} onChange={handleChange} className="rounded-none h-9 text-sm" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="der" className="text-[10px] uppercase font-bold text-zinc-400">DER</Label>
-              <Input id="der" name="der" value={data.der} onChange={handleChange} className="rounded-none h-9 text-sm" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="yuk" className="text-[10px] uppercase font-bold text-zinc-400">YÜK</Label>
-              <Input id="yuk" name="yuk" value={data.yuk} onChange={handleChange} className="rounded-none h-9 text-sm" />
-            </div>
-          </div>
         </div>
       </CardContent>
     </Card>

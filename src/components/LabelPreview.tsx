@@ -65,13 +65,10 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
           <table className="w-full border-collapse text-[11px] font-bold text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
             <thead>
               <tr className="bg-[#d8d0cc]">
-                <th className="border-[1.5px] border-black h-[22px] text-center uppercase px-1" style={{ width: '36%' }}>ÜRÜN</th>
-                <th className="border-[1.5px] border-black h-[22px] text-center uppercase" style={{ width: '9%' }}>ADET</th>
-                <th className="border-[1.5px] border-black h-[22px] text-center uppercase" style={{ width: '13%' }}>PEŞİN</th>
-                <th className="border-[1.5px] border-black h-[22px] text-center uppercase" style={{ width: '13%' }}>TAKSİT</th>
-                <th className="border-[1.5px] border-black h-[22px] text-center uppercase" style={{ width: '9.66%' }}>GEN</th>
-                <th className="border-[1.5px] border-black h-[22px] text-center uppercase" style={{ width: '9.66%' }}>DER</th>
-                <th className="border-[1.5px] border-black h-[22px] text-center uppercase" style={{ width: '9.66%' }}>YÜK</th>
+                <th className="border-[1.5px] border-black h-[22px] text-center uppercase px-1" style={{ width: '50%' }}>ÜRÜN</th>
+                <th className="border-[1.5px] border-black h-[22px] text-center uppercase" style={{ width: '15%' }}>ADET</th>
+                <th className="border-[1.5px] border-black h-[22px] text-center uppercase" style={{ width: '17.5%' }}>PEŞİN</th>
+                <th className="border-[1.5px] border-black h-[22px] text-center uppercase" style={{ width: '17.5%' }}>TAKSİT</th>
               </tr>
             </thead>
             <tbody>
@@ -81,16 +78,10 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
                 <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.quantity}</td>
                 <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.tableCashPrice}</td>
                 <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.tableInstallmentPrice}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.gen}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.der}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.yuk}</td>
               </tr>
               {/* Boş Satırlar */}
               {[...Array(4)].map((_, i) => (
                 <tr key={i}>
-                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
-                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
-                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
                   <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
                   <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
                   <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
