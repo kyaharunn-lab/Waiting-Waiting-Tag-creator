@@ -13,13 +13,13 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
   return (
     <div className="label-preview-container bg-white border border-gray-100">
       {/* Üst Kırmızı Bölüm */}
-      <div className="header-shape flex items-center justify-center p-8">
+      <div className="header-shape flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl w-full h-full flex items-center justify-center shadow-md relative overflow-hidden">
           {data.productImage ? (
             <img 
               src={data.productImage} 
               alt="Ürün" 
-              className="w-full h-full object-contain p-4" 
+              className="w-full h-full object-contain object-center" 
             />
           ) : (
             <div className="flex flex-col items-center gap-2 opacity-20">
