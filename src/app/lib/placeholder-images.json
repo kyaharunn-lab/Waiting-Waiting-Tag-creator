@@ -1,0 +1,11 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "sofa-placeholder",
+      "description": "Professional sofa outline",
+      "imageUrl": "https://picsum.photos/seed/sofa1/600/400",
+      "imageHint": "sofa furniture"
+    }
+  ]
+}
