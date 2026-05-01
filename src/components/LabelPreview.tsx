@@ -23,15 +23,30 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
         />
       )}
 
-      {/* 2. DİNAMİK İÇERİK KATMANI (Overlay Layer) - Sadece Şablon Üzerine Bindirme */}
+      {/* 2. DİNAMİK İÇERİK KATMANI (Overlay Layer) */}
       <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
         
         {/* ÜRÜN BAŞLIĞI - Siyah Bar Üzeri */}
         <div 
-          className="absolute left-[8%] right-[8%] flex items-center justify-center bg-[#252525]" 
-          style={{ top: '37.2%', height: '36px' }}
+          className="absolute left-[8%] right-[8%] flex items-center justify-center bg-[#252525] px-[12px] py-[8px]" 
+          style={{ 
+            top: '37.2%', 
+            minHeight: '36px', 
+            height: 'auto',
+            boxSizing: 'border-box'
+          }}
         >
-          <h2 className="text-white font-bold uppercase tracking-tight leading-none text-center" style={{ fontSize: '20px', fontFamily: 'Arial, sans-serif' }}>
+          <h2 
+            className="text-white font-bold uppercase text-center break-words" 
+            style={{ 
+              fontSize: '20px', 
+              fontFamily: 'Arial, sans-serif',
+              lineHeight: '1.2',
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word'
+            }}
+          >
             {data.productTitle}
           </h2>
         </div>
