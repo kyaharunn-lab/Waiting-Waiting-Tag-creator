@@ -1,9 +1,8 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'VizeTag Creator | Vize Home Etiket Oluşturucu',
+  title: 'Waiting Waiting evyapar | Etiket Oluşturucu',
   description: 'Profesyonel ürün etiketleri oluşturun',
 };
 

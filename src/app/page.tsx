@@ -25,7 +25,7 @@ export default function Home() {
       <aside className="w-full md:w-[400px] lg:w-[450px] border-r bg-white flex flex-col shrink-0 print:hidden shadow-xl z-20">
         <div className="p-4 border-b bg-[#9f2732] flex items-center justify-between text-white">
           <div className="flex items-center gap-2">
-            <h1 className="font-bold text-lg tracking-tight italic">vize<span className="font-normal opacity-80 ml-1">Tag</span></h1>
+            <h1 className="font-bold text-lg tracking-tight italic">Waiting Waiting evyapar</h1>
           </div>
           <div className="px-2 py-0.5 bg-white/20 text-[10px] font-bold uppercase rounded border border-white/30">
             A5 Format
