@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { LabelData } from '@/lib/types';
-import { Sofa, Handshake } from 'lucide-react';
+import { Handshake } from 'lucide-react';
 
 interface LabelPreviewProps {
   data: LabelData;
@@ -12,9 +12,9 @@ interface LabelPreviewProps {
 const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
   return (
     <div className="label-preview-container bg-white border border-gray-100">
-      {/* Üst Kırmızı Bölüm */}
+      {/* Üst Kırmızı Bölüm - Görsel Alanı */}
       <div className="header-shape flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl w-full h-full flex items-center justify-center shadow-md relative overflow-hidden">
+        <div className="bg-white rounded-2xl w-full h-full flex items-center justify-center relative overflow-hidden">
           {data.productImage ? (
             <img 
               src={data.productImage} 
@@ -22,10 +22,8 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
               className="w-full h-full object-contain object-center" 
             />
           ) : (
-            <div className="flex flex-col items-center gap-2 opacity-20">
-              <Sofa size={120} className="text-[#A11D21]" strokeWidth={1} />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#A11D21]">Görsel Yok</span>
-            </div>
+            /* Görsel yüklenmediğinde tamamen boş beyaz alan */
+            null
           )}
         </div>
       </div>
