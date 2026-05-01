@@ -22,12 +22,26 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
 
+  // Fiyat formatlama: 3415,00 -> 3.415
   const formatTurkishNumber = (val: any): string => {
     if (val === undefined || val === null || val === '') return '';
-    const cleanVal = val.toString().replace(/\./g, '').replace(',', '.');
+    
+    // Excel'den gelen "3415,00" string'ini veya sayısını temizle
+    let cleanVal = val.toString().replace(/\s/g, ''); // Boşlukları kaldır
+    
+    // Eğer virgül varsa (Türkçe format), noktaya çevirip parse et
+    if (cleanVal.includes(',')) {
+      cleanVal = cleanVal.replace(/\./g, '').replace(',', '.');
+    }
+
     const num = parseFloat(cleanVal);
     if (isNaN(num)) return val.toString();
-    return new Intl.NumberFormat('tr-TR').format(num);
+
+    // Binlik ayırıcı (nokta) ekle, ondalık kısmını at (eğer tam sayıysa veya ,00 ise)
+    return new Intl.NumberFormat('tr-TR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num);
   };
 
   const handleManualChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,13 +73,20 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         const wb = XLSX.read(bstr, { type: 'binary' });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
+        
+        // JSON olarak oku
         const dataJson: any[] = XLSX.utils.sheet_to_json(ws);
         
+        // Vize Excel Kolon Eşleşmesi:
+        // A: "Ürün Adı"
+        // B: "Miktar" (veya ADET)
+        // C: "Kredi Katı Satıs Fiyat"
+        // D: "1+7 Ay Taksit Fiyat"
         const products: ExcelProduct[] = dataJson.map(row => ({
-          productName: row["ÜRÜN ADI"] || row["Ürün Adı"] || "",
-          quantity: row["ADET"] || row["Adet"] || "1",
-          cashPrice: formatTurkishNumber(row["FİTA1"] || row["Fiyat1"] || ""),
-          installmentPrice: formatTurkishNumber(row["FİYAT2"] || row["Fiyat2"] || "")
+          productName: row["Ürün Adı"] || row["ÜRÜN ADI"] || "",
+          quantity: row["Miktar"] || row["ADET"] || row["Adet"] || "1",
+          cashPrice: formatTurkishNumber(row["Kredi Katı Satıs Fiyat"] || row["FİTA1"] || ""),
+          installmentPrice: formatTurkishNumber(row["1+7 Ay Taksit Fiyat"] || row["FİYAT2"] || "")
         })).filter(p => p.productName);
 
         setExcelProducts(products);
@@ -142,12 +163,12 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         {/* EXCEL YÜKLEME VE ÜRÜN SEÇME */}
         <div className="space-y-3">
-          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Ürün Ekle (Excel)</Label>
+          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Ürün Ekle (Vize Excel)</Label>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Button variant="outline" className="w-full h-9 rounded-none text-xs border-dashed border-zinc-300 hover:bg-zinc-50 relative overflow-hidden">
                 <FileSpreadsheet className="w-4 h-4 mr-2 text-green-600" />
-                {excelProducts.length > 0 ? `${excelProducts.length} Ürün Yüklü` : 'Excel Yükle'}
+                {excelProducts.length > 0 ? `${excelProducts.length} Ürün Yüklü` : 'Vize Excel Yükle'}
                 <input type="file" accept=".xlsx, .xls" onChange={handleExcelUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
               </Button>
             </div>
