@@ -23,10 +23,10 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
         />
       )}
 
-      {/* 2. DİNAMİK İÇERİK KATMANI (Overlay Layer) */}
+      {/* 2. DİNAMİK İÇERİK KATMANI (Overlay Layer) - Sadece Şablon Üzerine Bindirme */}
       <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
         
-        {/* ÜRÜN BAŞLIĞI - Siyah Bar */}
+        {/* ÜRÜN BAŞLIĞI - Siyah Bar Üzeri */}
         <div 
           className="absolute left-[8%] right-[8%] flex items-center justify-center bg-[#252525]" 
           style={{ top: '37.2%', height: '36px' }}
@@ -36,7 +36,7 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
           </h2>
         </div>
 
-        {/* FİYAT ALANI - Gri Kutu */}
+        {/* FİYAT ALANI - Gri Kutu Üzeri */}
         <div 
           className="absolute left-[8%] right-[8%] grid grid-cols-2 bg-[#ded8d5]" 
           style={{ top: '46%', height: '56px' }}
@@ -59,10 +59,10 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
 
         {/* TABLO ALANI - Dinamik Satır Sayısı */}
         <div 
-          className="absolute left-[7.8%] right-[7.8%] max-h-[40%] overflow-y-auto" 
+          className="absolute left-[7.8%] right-[7.8%]" 
           style={{ top: '56.2%' }}
         >
-          <table className="w-full border-collapse text-[11px] font-bold text-black bg-white/40" style={{ fontFamily: 'Arial, sans-serif' }}>
+          <table className="w-full border-collapse text-[11px] font-bold text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
             <thead>
               <tr className="bg-[#d8d0cc]">
                 <th className="border-[1.5px] border-black h-[22px] text-center uppercase px-1" style={{ width: '50%' }}>ÜRÜN</th>
@@ -73,18 +73,18 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
             </thead>
             <tbody>
               {data.tableRows.map((row, index) => (
-                <tr key={index}>
+                <tr key={index} className="bg-white/40">
                   <td className="border-[1.5px] border-black h-[24px] px-2 text-left truncate">
                     {row.productName}
                   </td>
                   <td className="border-[1.5px] border-black h-[24px] text-center">
                     {row.quantity}
                   </td>
-                  <td className="border-[1.5px] border-black h-[24px] text-center">
-                    {row.cashPrice}
+                  <td className="border-[1.5px] border-black h-[24px] text-center whitespace-nowrap">
+                    {row.cashPrice} ₺
                   </td>
-                  <td className="border-[1.5px] border-black h-[24px] text-center">
-                    {row.installmentPrice}
+                  <td className="border-[1.5px] border-black h-[24px] text-center whitespace-nowrap">
+                    {row.installmentPrice} ₺
                   </td>
                 </tr>
               ))}

@@ -25,8 +25,10 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
   const formatTurkishNumber = (val: any): string => {
     if (val === undefined || val === null || val === '') return '';
     
+    // Sayıyı temizle (boşlukları sil, virgülü noktaya çevir)
     let cleanVal = val.toString().replace(/\s/g, '');
     
+    // Eğer virgül içeriyorsa, binlik ayırıcıyı silip virgülü nokta yap
     if (cleanVal.includes(',')) {
       cleanVal = cleanVal.replace(/\./g, '').replace(',', '.');
     }
@@ -34,6 +36,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
     const num = parseFloat(cleanVal);
     if (isNaN(num)) return val.toString();
 
+    // Türk formatında binlik ayırıcı ekle (4.930 gibi)
     return new Intl.NumberFormat('tr-TR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
@@ -132,6 +135,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
       </CardHeader>
       <CardContent className="p-4 space-y-6">
         
+        {/* 1. Şablon Yükleme */}
         <div className="space-y-3">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">1. Şablon Görseli Yükle (A5)</Label>
           {!data.productImage ? (
@@ -155,6 +159,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         <Separator />
 
+        {/* 2. Excel Yükleme ve Arama */}
         <div className="space-y-3">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Ürün Ekle (Vize Excel)</Label>
           <div className="flex gap-2">
@@ -206,6 +211,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
           </div>
         </div>
 
+        {/* Eklenen Ürünler Listesi */}
         {data.tableRows.length > 0 && (
           <div className="space-y-2">
             <Label className="text-[10px] uppercase font-bold text-zinc-400">Eklenen Ürünler ({data.tableRows.length})</Label>
@@ -230,6 +236,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         <Separator />
 
+        {/* 3. Manuel Toplam Fiyatlar */}
         <div className="space-y-4">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">3. Başlık ve Toplam Fiyatlar</Label>
           <div className="grid gap-2">
