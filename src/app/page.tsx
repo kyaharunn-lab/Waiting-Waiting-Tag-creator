@@ -16,6 +16,7 @@ export default function Home() {
   };
 
   const handlePrint = () => {
+    console.log("PRINT CLICKED");
     window.print();
   };
 
@@ -54,7 +55,12 @@ export default function Home() {
                     <RotateCcw className="w-3 h-3 mr-1" />
                     Sıfırla
                  </Button>
-                 <Button size="sm" onClick={handlePrint} className="h-8 text-[10px] uppercase font-bold bg-[#9f2732] hover:bg-[#832029] rounded-none">
+                 <Button 
+                   type="button" 
+                   size="sm" 
+                   onClick={handlePrint} 
+                   className="h-8 text-[10px] uppercase font-bold bg-[#9f2732] hover:bg-[#832029] rounded-none cursor-pointer"
+                 >
                     <Printer className="w-3 h-3 mr-1" />
                     Yazdır / PDF
                  </Button>
