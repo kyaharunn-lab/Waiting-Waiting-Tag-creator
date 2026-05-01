@@ -40,7 +40,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
   const searchRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -121,6 +120,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         }
 
         const products: ExcelProduct[] = dataRows.slice(1).map(row => {
+          // A:0 (Ürün), C:2 (Peşin), D:3 (Taksit)
           const name = row[0] || "";
           const cash = row[2] || "";
           const installment = row[3] || "";
@@ -262,7 +262,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
       </CardHeader>
       <CardContent className="p-4 space-y-6 overflow-visible">
         
-        {/* 1. Şablon Yükleme */}
         <div className="space-y-3">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">1. Şablon Görseli Yükle (A5)</Label>
           {!data.productImage ? (
@@ -289,7 +288,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         <Separator />
 
-        {/* 2. Excel Yükleme ve Arama */}
         <div className="space-y-3">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Excel Ürün Listesi (A:Ürün, C:Peşin, D:Taksit)</Label>
           
@@ -448,7 +446,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
           </div>
         </div>
 
-        {/* 3. Eklenen Ürünler Listesi */}
         {data.tableRows.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -488,7 +485,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         <Separator />
 
-        {/* 4. Manuel Başlık ve Fiyatlar */}
         <div className="space-y-4">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">3. Başlık ve Toplam Fiyatlar</Label>
           <div className="grid gap-2">
@@ -496,7 +492,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
             <Input 
               id="productTitle" 
               name="productTitle" 
-              placeholder="Örn: DELFİN KOLTUK TAKIMI"
+              placeholder="Ürün başlığını giriniz"
               value={data.productTitle} 
               onChange={handleManualChange} 
               className="rounded-none h-10 text-sm border-zinc-300 focus-visible:ring-[#9f2732]" 
@@ -529,7 +525,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
           </div>
         </div>
 
-        {/* 5. Otomatik Tablo Toplamı */}
         <div className="space-y-3 p-4 bg-zinc-100/50 border border-zinc-200 animate-in fade-in zoom-in-95">
           <div className="flex items-center gap-2">
             <Label className="text-[10px] uppercase font-bold text-zinc-500">TABLO TOPLAMI (Otomatik)</Label>
@@ -539,13 +534,13 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
             <div className="space-y-1">
               <span className="text-[9px] uppercase font-bold text-zinc-400">Toplam Peşin</span>
               <div className="text-sm font-bold text-zinc-800 tabular-nums">
-                {formatTurkishNumber(tableTotals.cash)} ₺
+                {new Intl.NumberFormat('tr-TR').format(tableTotals.cash)} ₺
               </div>
             </div>
             <div className="space-y-1">
               <span className="text-[9px] uppercase font-bold text-zinc-400">Toplam Taksit</span>
               <div className="text-sm font-bold text-zinc-800 tabular-nums">
-                {formatTurkishNumber(tableTotals.installment)} ₺
+                {new Intl.NumberFormat('tr-TR').format(tableTotals.installment)} ₺
               </div>
             </div>
           </div>
