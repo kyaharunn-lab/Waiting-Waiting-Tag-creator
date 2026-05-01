@@ -89,13 +89,24 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         const wb = XLSX.read(bstr, { type: 'binary' });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
-        const dataJson: any[] = XLSX.utils.sheet_to_json(ws);
         
-        const products: ExcelProduct[] = dataJson.map(row => {
-          const keys = Object.keys(row);
-          const name = row["Ürün Adı"] || row["ÜRÜN ADI"] || row[keys[0]] || "";
-          const cash = row["Kredi Katı Satıs Fiyat"] || row["FİTA1"] || row[keys[2]] || "";
-          const installment = row["1+7 Ay Taksit Fiyat"] || row["FİYAT2"] || row[keys[3]] || "";
+        // Use header: 1 to get arrays of rows for reliable index-based access
+        // A=0 (Name), B=1 (Ignored), C=2 (Peşin), D=3 (Taksit)
+        const dataRows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        
+        if (dataRows.length < 2) {
+          toast({
+            variant: "destructive",
+            title: "Hata",
+            description: "Excel boş veya sadece başlık içeriyor.",
+          });
+          return;
+        }
+
+        const products: ExcelProduct[] = dataRows.slice(1).map(row => {
+          const name = row[0] || "";
+          const cash = row[2] || "";
+          const installment = row[3] || "";
           
           return {
             productName: name.toString().trim(),
@@ -109,7 +120,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
           toast({
             variant: "destructive",
             title: "Format Hatası",
-            description: "Excel'de geçerli ürün bulunamadı.",
+            description: "Excel'de geçerli ürün bulunamadı. A sütununda Ürün Adı, C'de Peşin, D'de Taksit olmalıdır.",
           });
           return;
         }
@@ -141,7 +152,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
     const newSelected = new Set(selectedIndices);
     
     if (isShift && lastSelectedIndex !== null) {
-      // Find current filtered indices to understand the visual range
       const currentFilteredIndices = filteredProducts.map(p => p.originalIndex);
       const start = currentFilteredIndices.indexOf(lastSelectedIndex);
       const end = currentFilteredIndices.indexOf(originalIndex);
@@ -264,7 +274,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         {/* 2. Excel Yükleme ve Arama */}
         <div className="space-y-3">
-          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Excel Ürün Listesi</Label>
+          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Excel Ürün Listesi (A:Ürün, C:Peşin, D:Taksit)</Label>
           
           <div 
             className={cn(
@@ -293,7 +303,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
             )}
           </div>
 
-          {/* Arama ve Çoklu Seçim Arayüzü */}
           <div className="relative mt-4" ref={searchRef}>
             <div className="flex flex-col gap-2 mb-2">
               <div className="relative">
@@ -316,7 +325,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
                 />
               </div>
 
-              {/* Seçim Sayaç ve Aksiyonları */}
               {selectedIndices.size > 0 && (
                 <div className="flex items-center justify-between bg-zinc-100 p-2 border border-zinc-200 animate-in fade-in slide-in-from-top-1">
                   <div className="flex items-center gap-2">
@@ -346,13 +354,11 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
               )}
             </div>
             
-            {/* Arama Sonuçları Paneli */}
             {showResults && searchTerm && (
               <div 
                 ref={resultsRef}
                 className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 shadow-2xl max-h-[400px] flex flex-col animate-in fade-in slide-in-from-top-1"
               >
-                {/* Sonuç Paneli Başlığı */}
                 <div className="p-2 border-b bg-zinc-50 flex items-center justify-between sticky top-0 z-10">
                   <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-tighter">
                     {filteredProducts.length} SONUÇ BULUNDU
@@ -401,8 +407,8 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
                                 )}
                               </div>
                               <div className="flex gap-3 mt-0.5">
-                                <span className="text-[10px] text-zinc-500 font-medium">Peşin: <b className="text-zinc-700">{p.cashPrice} ₺</b></span>
-                                <span className="text-[10px] text-zinc-500 font-medium">Taksit: <b className="text-zinc-700">{p.installmentPrice} ₺</b></span>
+                                <span className="text-[10px] text-zinc-500 font-medium">Peşin (C): <b className="text-zinc-700">{p.cashPrice} ₺</b></span>
+                                <span className="text-[10px] text-zinc-500 font-medium">Taksit (D): <b className="text-zinc-700">{p.installmentPrice} ₺</b></span>
                               </div>
                             </div>
                             
