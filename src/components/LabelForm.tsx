@@ -1,17 +1,24 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { LabelData, ExcelProduct, TableRow } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Upload, X, FileSpreadsheet, Search, Trash2, Plus, CheckCircle2, AlertCircle } from 'lucide-react';
+import { 
+  Upload, X, FileSpreadsheet, Search, Trash2, Plus, 
+  CheckCircle2, AlertCircle, Checkbox as CheckboxIcon, 
+  CheckSquare, Square, ListPlus, RotateCcw, MousePointer2 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import * as XLSX from 'xlsx';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface LabelFormProps {
   data: LabelData;
@@ -25,6 +32,10 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
+  
+  // Selection states
+  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   
   const searchRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -80,10 +91,8 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         const ws = wb.Sheets[wsname];
         const dataJson: any[] = XLSX.utils.sheet_to_json(ws);
         
-        // Vize Excel Format: A=Product, C=Cash, D=Installment
         const products: ExcelProduct[] = dataJson.map(row => {
           const keys = Object.keys(row);
-          // Try to match by header name or by index (if headers are missing)
           const name = row["Ürün Adı"] || row["ÜRÜN ADI"] || row[keys[0]] || "";
           const cash = row["Kredi Katı Satıs Fiyat"] || row["FİTA1"] || row[keys[2]] || "";
           const installment = row["1+7 Ay Taksit Fiyat"] || row["FİYAT2"] || row[keys[3]] || "";
@@ -100,13 +109,14 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
           toast({
             variant: "destructive",
             title: "Format Hatası",
-            description: "Excel'de geçerli ürün bulunamadı. Lütfen sütunları kontrol edin.",
+            description: "Excel'de geçerli ürün bulunamadı.",
           });
           return;
         }
 
         setExcelProducts(products);
         setFileName(file.name);
+        setSelectedIndices(new Set());
         toast({
           title: "Excel Başarıyla Yüklendi",
           description: `${products.length} ürün listelendi.`,
@@ -122,34 +132,70 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
     reader.readAsBinaryString(file);
   };
 
-  const handleExcelDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
-      processExcel(file);
-    }
-  };
+  const filteredProducts = useMemo(() => {
+    return excelProducts.map((p, originalIndex) => ({ ...p, originalIndex }))
+      .filter(p => p.productName.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [excelProducts, searchTerm]);
 
-  const handleExcelSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) processExcel(file);
-  };
-
-  const addProduct = (product: ExcelProduct) => {
-    const newRows = [
-      ...data.tableRows,
-      {
-        productName: product.productName,
-        quantity: "1",
-        cashPrice: product.cashPrice,
-        installmentPrice: product.installmentPrice,
+  const toggleSelect = (originalIndex: number, isShift: boolean) => {
+    const newSelected = new Set(selectedIndices);
+    
+    if (isShift && lastSelectedIndex !== null) {
+      // Find current filtered indices to understand the visual range
+      const currentFilteredIndices = filteredProducts.map(p => p.originalIndex);
+      const start = currentFilteredIndices.indexOf(lastSelectedIndex);
+      const end = currentFilteredIndices.indexOf(originalIndex);
+      
+      if (start !== -1 && end !== -1) {
+        const [low, high] = [Math.min(start, end), Math.max(start, end)];
+        for (let i = low; i <= high; i++) {
+          newSelected.add(currentFilteredIndices[i]);
+        }
       }
-    ];
+    } else {
+      if (newSelected.has(originalIndex)) {
+        newSelected.delete(originalIndex);
+      } else {
+        newSelected.add(originalIndex);
+      }
+    }
+    
+    setSelectedIndices(newSelected);
+    setLastSelectedIndex(originalIndex);
+  };
+
+  const selectAllFiltered = () => {
+    const newSelected = new Set(selectedIndices);
+    filteredProducts.forEach(p => newSelected.add(p.originalIndex));
+    setSelectedIndices(newSelected);
+  };
+
+  const clearSelection = () => {
+    setSelectedIndices(new Set());
+    setLastSelectedIndex(null);
+  };
+
+  const addSelectedToTable = () => {
+    if (selectedIndices.size === 0) return;
+    
+    const productsToAdd = Array.from(selectedIndices).map(idx => excelProducts[idx]);
+    const newRows = [...data.tableRows, ...productsToAdd.map(p => ({
+      productName: p.productName,
+      quantity: "1",
+      cashPrice: p.cashPrice,
+      installmentPrice: p.installmentPrice
+    }))];
+    
     onChange({ ...data, tableRows: newRows });
+    setSelectedIndices(new Set());
+    setLastSelectedIndex(null);
     setSearchTerm('');
     setShowResults(false);
-    setActiveIndex(-1);
+    
+    toast({
+      title: "Ürünler Eklendi",
+      description: `${productsToAdd.length} ürün tabloya başarıyla eklendi.`,
+    });
   };
 
   const removeRow = (index: number) => {
@@ -157,9 +203,9 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
     onChange({ ...data, tableRows: newRows });
   };
 
-  const filteredProducts = excelProducts.filter(p => 
-    p.productName.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 50); // Limit results for performance
+  const isAlreadyAdded = (productName: string) => {
+    return data.tableRows.some(row => row.productName === productName);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!showResults || filteredProducts.length === 0) return;
@@ -172,25 +218,15 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
       setActiveIndex(prev => (prev > 0 ? prev - 1 : prev));
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (activeIndex >= 0) {
-        addProduct(filteredProducts[activeIndex]);
-      } else if (filteredProducts.length > 0) {
-        addProduct(filteredProducts[0]);
+      if (selectedIndices.size > 0) {
+        addSelectedToTable();
+      } else if (activeIndex >= 0) {
+        toggleSelect(filteredProducts[activeIndex].originalIndex, e.shiftKey);
       }
     } else if (e.key === 'Escape') {
       setShowResults(false);
     }
   };
-
-  // Scroll active item into view
-  useEffect(() => {
-    if (activeIndex >= 0 && resultsRef.current) {
-      const activeElement = resultsRef.current.children[activeIndex] as HTMLElement;
-      if (activeElement) {
-        activeElement.scrollIntoView({ block: 'nearest' });
-      }
-    }
-  }, [activeIndex]);
 
   return (
     <Card className="shadow-none border border-zinc-200 rounded-none overflow-visible">
@@ -226,7 +262,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         <Separator />
 
-        {/* 2. Excel Yükleme (Dropzone) */}
+        {/* 2. Excel Yükleme ve Arama */}
         <div className="space-y-3">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Excel Ürün Listesi</Label>
           
@@ -238,9 +274,9 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
             )}
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
-            onDrop={handleExcelDrop}
+            onDrop={(e) => { e.preventDefault(); setIsDragging(false); const file = e.dataTransfer.files?.[0]; if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) processExcel(file); }}
           >
-            <input type="file" accept=".xlsx, .xls" onChange={handleExcelSelect} className="absolute inset-0 opacity-0 cursor-pointer" />
+            <input type="file" accept=".xlsx, .xls" onChange={(e) => { const file = e.target.files?.[0]; if (file) processExcel(file); }} className="absolute inset-0 opacity-0 cursor-pointer" />
             
             {fileName ? (
               <div className="space-y-1">
@@ -257,63 +293,133 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
             )}
           </div>
 
-          {/* Arama Sistemi */}
+          {/* Arama ve Çoklu Seçim Arayüzü */}
           <div className="relative mt-4" ref={searchRef}>
-            <div className="relative">
-              <Search className={cn(
-                "absolute left-3 top-2.5 h-4 w-4 transition-colors",
-                excelProducts.length > 0 ? "text-zinc-500" : "text-zinc-300"
-              )} />
-              <Input
-                placeholder={excelProducts.length > 0 ? "Ürün adı ara ve ENTER'la ekle..." : "Önce Excel yükleyin"}
-                value={searchTerm}
-                disabled={excelProducts.length === 0}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setShowResults(true);
-                  setActiveIndex(-1);
-                }}
-                onFocus={() => setShowResults(true)}
-                onKeyDown={handleKeyDown}
-                className="pl-9 h-10 rounded-none text-sm border-zinc-300 focus-visible:ring-[#9f2732]"
-              />
+            <div className="flex flex-col gap-2 mb-2">
+              <div className="relative">
+                <Search className={cn(
+                  "absolute left-3 top-2.5 h-4 w-4 transition-colors",
+                  excelProducts.length > 0 ? "text-zinc-500" : "text-zinc-300"
+                )} />
+                <Input
+                  placeholder={excelProducts.length > 0 ? "Ürün ara, SPACE ile seç, ENTER ile ekle..." : "Önce Excel yükleyin"}
+                  value={searchTerm}
+                  disabled={excelProducts.length === 0}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setShowResults(true);
+                    setActiveIndex(-1);
+                  }}
+                  onFocus={() => setShowResults(true)}
+                  onKeyDown={handleKeyDown}
+                  className="pl-9 h-10 rounded-none text-sm border-zinc-300 focus-visible:ring-[#9f2732]"
+                />
+              </div>
+
+              {/* Seçim Sayaç ve Aksiyonları */}
+              {selectedIndices.size > 0 && (
+                <div className="flex items-center justify-between bg-zinc-100 p-2 border border-zinc-200 animate-in fade-in slide-in-from-top-1">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-[#9f2732] text-white rounded-none text-[10px]">
+                      {selectedIndices.size} SEÇİLDİ
+                    </Badge>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      onClick={clearSelection}
+                      className="h-7 text-[9px] font-bold uppercase hover:text-[#9f2732]"
+                    >
+                      TEMİZLE
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={addSelectedToTable}
+                      className="h-7 text-[9px] font-bold uppercase bg-[#9f2732] hover:bg-[#832029] rounded-none"
+                    >
+                      <ListPlus className="w-3 h-3 mr-1" />
+                      SEÇİLENLERİ EKLE
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Arama Sonuçları Paneli */}
             {showResults && searchTerm && (
               <div 
                 ref={resultsRef}
-                className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 shadow-xl max-h-[300px] overflow-auto animate-in fade-in slide-in-from-top-1"
+                className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 shadow-2xl max-h-[400px] flex flex-col animate-in fade-in slide-in-from-top-1"
               >
-                {filteredProducts.length > 0 ? (
-                  filteredProducts.map((p, idx) => (
-                    <div
-                      key={idx}
-                      className={cn(
-                        "p-3 text-xs border-b last:border-0 cursor-pointer transition-colors flex items-center justify-between group",
-                        activeIndex === idx ? "bg-zinc-100 border-l-4 border-l-[#9f2732]" : "hover:bg-zinc-50"
-                      )}
-                      onClick={() => addProduct(p)}
-                      onMouseEnter={() => setActiveIndex(idx)}
-                    >
-                      <div className="flex-1 truncate pr-4">
-                        <div className="font-bold text-zinc-800 uppercase truncate">{p.productName}</div>
-                        <div className="flex gap-3 mt-0.5">
-                          <span className="text-zinc-500">Peşin: <b className="text-zinc-700">{p.cashPrice} ₺</b></span>
-                          <span className="text-zinc-500">Taksit: <b className="text-zinc-700">{p.installmentPrice} ₺</b></span>
-                        </div>
+                {/* Sonuç Paneli Başlığı */}
+                <div className="p-2 border-b bg-zinc-50 flex items-center justify-between sticky top-0 z-10">
+                  <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-tighter">
+                    {filteredProducts.length} SONUÇ BULUNDU
+                  </span>
+                  <Button variant="ghost" size="sm" onClick={selectAllFiltered} className="h-6 text-[9px] font-bold uppercase hover:bg-zinc-200">
+                    TÜMÜNÜ SEÇ
+                  </Button>
+                </div>
+
+                <ScrollArea className="flex-1">
+                  <div className="p-0">
+                    {filteredProducts.length > 0 ? (
+                      filteredProducts.map((p, idx) => {
+                        const isSelected = selectedIndices.has(p.originalIndex);
+                        const added = isAlreadyAdded(p.productName);
+                        
+                        return (
+                          <div
+                            key={idx}
+                            className={cn(
+                              "p-3 text-xs border-b last:border-0 cursor-pointer transition-all flex items-center gap-3 group relative",
+                              activeIndex === idx ? "bg-zinc-100" : "hover:bg-zinc-50",
+                              isSelected && "bg-[#9f2732]/5 border-l-4 border-l-[#9f2732]"
+                            )}
+                            onClick={(e) => toggleSelect(p.originalIndex, e.shiftKey)}
+                            onDoubleClick={addSelectedToTable}
+                            onMouseEnter={() => setActiveIndex(idx)}
+                          >
+                            <Checkbox 
+                              checked={isSelected} 
+                              className="rounded-none border-zinc-300 data-[state=checked]:bg-[#9f2732] data-[state=checked]:border-[#9f2732]"
+                            />
+                            
+                            <div className="flex-1 truncate pr-4">
+                              <div className="flex items-center gap-2">
+                                <span className={cn(
+                                  "font-bold uppercase truncate",
+                                  added ? "text-zinc-400" : "text-zinc-800"
+                                )}>
+                                  {p.productName}
+                                </span>
+                                {added && (
+                                  <Badge variant="outline" className="text-[8px] font-bold uppercase text-zinc-400 border-zinc-200 px-1 py-0 h-4">
+                                    <CheckCircle2 className="w-2 h-2 mr-1" /> EKLENDİ
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex gap-3 mt-0.5">
+                                <span className="text-[10px] text-zinc-500 font-medium">Peşin: <b className="text-zinc-700">{p.cashPrice} ₺</b></span>
+                                <span className="text-[10px] text-zinc-500 font-medium">Taksit: <b className="text-zinc-700">{p.installmentPrice} ₺</b></span>
+                              </div>
+                            </div>
+                            
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                               <MousePointer2 className="w-3 h-3 text-zinc-300" />
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="p-8 text-center">
+                        <AlertCircle className="w-6 h-6 mx-auto text-zinc-300 mb-2" />
+                        <p className="text-xs text-zinc-400 font-medium italic">Sonuç bulunamadı</p>
                       </div>
-                      <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 text-[#9f2732] bg-[#9f2732]/5">
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-8 text-center">
-                    <AlertCircle className="w-6 h-6 mx-auto text-zinc-300 mb-2" />
-                    <p className="text-xs text-zinc-400 font-medium italic">Sonuç bulunamadı</p>
+                    )}
                   </div>
-                )}
+                </ScrollArea>
               </div>
             )}
           </div>
@@ -323,29 +429,31 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         {data.tableRows.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-[10px] uppercase font-bold text-zinc-400">Eklenen Ürünler ({data.tableRows.length})</Label>
-              <button 
+              <Label className="text-[10px] uppercase font-bold text-zinc-400">Etiket Tablo Satırları ({data.tableRows.length})</Label>
+              <Button 
+                variant="ghost" 
+                size="sm"
                 onClick={() => onChange({...data, tableRows: []})} 
-                className="text-[9px] uppercase font-bold text-red-500 hover:underline"
+                className="h-6 text-[9px] uppercase font-bold text-red-500 hover:bg-red-50"
               >
                 TÜMÜNÜ TEMİZLE
-              </button>
+              </Button>
             </div>
-            <div className="space-y-1 max-h-[250px] overflow-auto pr-1">
+            <div className="space-y-1 max-h-[300px] overflow-auto pr-1">
               {data.tableRows.map((row, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-white border border-zinc-200 group hover:border-[#9f2732]/30 transition-all">
+                <div key={idx} className="flex items-center justify-between p-2.5 bg-white border border-zinc-200 group hover:border-[#9f2732]/30 transition-all">
                   <div className="truncate flex-1 pr-2">
-                    <div className="font-bold text-zinc-700 text-[11px] uppercase truncate">{row.productName}</div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[9px] bg-zinc-100 px-1 py-0.5 rounded font-bold text-zinc-500">ADET: {row.quantity}</span>
-                      <span className="text-[10px] font-bold text-[#9f2732]">{row.cashPrice} ₺</span>
+                    <div className="font-bold text-zinc-700 text-[10px] uppercase truncate">{row.productName}</div>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <span className="text-[9px] font-bold text-[#9f2732]">PEŞİN: {row.cashPrice} ₺</span>
+                      <span className="text-[9px] font-bold text-zinc-400">TAKSİT: {row.installmentPrice} ₺</span>
                     </div>
                   </div>
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={() => removeRow(idx)} 
-                    className="h-8 w-8 text-zinc-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-7 w-7 text-zinc-300 hover:text-red-500 hover:bg-red-50"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </Button>
@@ -359,7 +467,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         {/* 4. Manuel Toplam Fiyatlar */}
         <div className="space-y-4">
-          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">4. Başlık ve Toplam Fiyatlar</Label>
+          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">3. Başlık ve Toplam Fiyatlar</Label>
           <div className="grid gap-2">
             <Label htmlFor="productTitle" className="text-[10px] uppercase font-bold text-zinc-400">Siyah Bar Başlığı</Label>
             <Input 
@@ -374,7 +482,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="totalCashPrice" className="text-[10px] uppercase font-bold text-zinc-400">Toplam Peşin</Label>
+              <Label htmlFor="totalCashPrice" className="text-[10px] uppercase font-bold text-zinc-400">Büyük Peşin Fiyat</Label>
               <Input 
                 id="totalCashPrice" 
                 name="totalCashPrice" 
@@ -385,7 +493,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="totalInstallmentPrice" className="text-[10px] uppercase font-bold text-zinc-400">Toplam Taksit</Label>
+              <Label htmlFor="totalInstallmentPrice" className="text-[10px] uppercase font-bold text-zinc-400">Büyük Taksit Fiyat</Label>
               <Input 
                 id="totalInstallmentPrice" 
                 name="totalInstallmentPrice" 
