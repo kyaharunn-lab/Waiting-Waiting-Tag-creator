@@ -14,7 +14,7 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
       className="a5-container relative bg-white overflow-hidden shadow-none border border-zinc-200 print:border-none font-sans select-none"
       style={{ width: '148mm', height: '210mm' }}
     >
-      {/* 1. ARKA PLAN ŞABLONU */}
+      {/* 1. ARKA PLAN ŞABLONU (User Uploaded Template) */}
       {data.productImage && (
         <img 
           src={data.productImage} 
@@ -57,7 +57,7 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
           </div>
         </div>
 
-        {/* TABLO ALANI - Excel Formatında */}
+        {/* TABLO ALANI - Excel Formatında (5 Satır Sabit) */}
         <div 
           className="absolute left-[7.8%] right-[7.8%]" 
           style={{ top: '56.2%' }}
@@ -72,22 +72,26 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
               </tr>
             </thead>
             <tbody>
-              {/* Dinamik Veri Satırı */}
-              <tr>
-                <td className="border-[1.5px] border-black h-[30px] px-2 text-left truncate bg-white/40">{data.tableProductName}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.quantity}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.tableCashPrice}</td>
-                <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">{data.tableInstallmentPrice}</td>
-              </tr>
-              {/* Boş Satırlar */}
-              {[...Array(4)].map((_, i) => (
-                <tr key={i}>
-                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
-                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
-                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
-                  <td className="border-[1.5px] border-black h-[30px] bg-white/20"></td>
-                </tr>
-              ))}
+              {/* Dinamik Veri Satırları (Max 5) */}
+              {Array.from({ length: 5 }).map((_, i) => {
+                const row = data.tableRows[i];
+                return (
+                  <tr key={i}>
+                    <td className="border-[1.5px] border-black h-[30px] px-2 text-left truncate bg-white/40">
+                      {row?.productName || ""}
+                    </td>
+                    <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">
+                      {row?.quantity || ""}
+                    </td>
+                    <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">
+                      {row?.cashPrice || ""}
+                    </td>
+                    <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">
+                      {row?.installmentPrice || ""}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

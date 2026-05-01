@@ -2,14 +2,15 @@
 "use client";
 
 import React, { useState } from 'react';
-import { LabelData, ExcelProduct } from '@/lib/types';
+import { LabelData, ExcelProduct, TableRow } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Upload, X, FileSpreadsheet, Search } from 'lucide-react';
+import { Upload, X, FileSpreadsheet, Search, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import * as XLSX from 'xlsx';
+import { toast } from '@/hooks/use-toast';
 
 interface LabelFormProps {
   data: LabelData;
@@ -23,12 +24,31 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
   const formatTurkishNumber = (val: any): string => {
     if (val === undefined || val === null || val === '') return '';
-    const num = parseFloat(val.toString().replace(',', '.'));
+    // Temizleme: Noktaları kaldır, virgülü noktaya çevir
+    const cleanVal = val.toString().replace(/\./g, '').replace(',', '.');
+    const num = parseFloat(cleanVal);
     if (isNaN(num)) return val.toString();
     return new Intl.NumberFormat('tr-TR').format(num);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const calculateTotals = (rows: TableRow[]) => {
+    const cashTotal = rows.reduce((acc, row) => {
+      const val = parseFloat(row.cashPrice.replace(/\./g, '').replace(',', '.'));
+      return acc + (isNaN(val) ? 0 : val);
+    }, 0);
+
+    const instTotal = rows.reduce((acc, row) => {
+      const val = parseFloat(row.installmentPrice.replace(/\./g, '').replace(',', '.'));
+      return acc + (isNaN(val) ? 0 : val);
+    }, 0);
+
+    return {
+      cash: new Intl.NumberFormat('tr-TR').format(cashTotal),
+      inst: new Intl.NumberFormat('tr-TR').format(instTotal)
+    };
+  };
+
+  const handleManualChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     onChange({ ...data, [name]: value });
   };
@@ -67,23 +87,56 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         })).filter(p => p.productName);
 
         setExcelProducts(products);
+        toast({
+          title: "Excel Yüklendi",
+          description: `${products.length} ürün başarıyla içe aktarıldı.`,
+        });
       };
       reader.readAsBinaryString(file);
     }
   };
 
   const handleProductSelect = (product: ExcelProduct) => {
+    if (data.tableRows.length >= 5) {
+      toast({
+        variant: "destructive",
+        title: "Limit Aşıldı",
+        description: "En fazla 5 ürün ekleyebilirsiniz.",
+      });
+      return;
+    }
+
+    const newRows = [
+      ...data.tableRows,
+      {
+        productName: product.productName,
+        quantity: product.quantity.toString(),
+        cashPrice: product.cashPrice,
+        installmentPrice: product.installmentPrice,
+      }
+    ];
+
+    const totals = calculateTotals(newRows);
+
     onChange({
       ...data,
-      tableProductName: product.productName,
-      quantity: product.quantity.toString(),
-      tableCashPrice: product.cashPrice,
-      tableInstallmentPrice: product.installmentPrice,
-      totalCashPrice: product.cashPrice,
-      totalInstallmentPrice: product.installmentPrice
+      tableRows: newRows,
+      totalCashPrice: totals.cash,
+      totalInstallmentPrice: totals.inst
     });
     setSearchTerm('');
     setShowDropdown(false);
+  };
+
+  const removeRow = (index: number) => {
+    const newRows = data.tableRows.filter((_, i) => i !== index);
+    const totals = calculateTotals(newRows);
+    onChange({
+      ...data,
+      tableRows: newRows,
+      totalCashPrice: totals.cash,
+      totalInstallmentPrice: totals.inst
+    });
   };
 
   const filteredProducts = excelProducts.filter(p => 
@@ -123,7 +176,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         {/* EXCEL YÜKLEME VE ÜRÜN SEÇME */}
         <div className="space-y-3">
-          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Excel Ürün Listesi</Label>
+          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Ürün Ekle (Excel)</Label>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Button variant="outline" className="w-full h-9 rounded-none text-xs border-dashed border-zinc-300 hover:bg-zinc-50 relative overflow-hidden">
@@ -134,91 +187,89 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
             </div>
           </div>
 
-          {excelProducts.length > 0 && (
-            <div className="relative mt-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
-                <Input
-                  placeholder="Ürün adı ara..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setShowDropdown(true);
-                  }}
-                  onFocus={() => setShowDropdown(true)}
-                  className="pl-9 h-9 rounded-none text-sm"
-                />
-              </div>
-              {showDropdown && searchTerm && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 shadow-lg max-h-60 overflow-auto">
-                  {filteredProducts.length > 0 ? (
-                    filteredProducts.map((p, idx) => (
-                      <div
-                        key={idx}
-                        className="p-2 text-xs hover:bg-zinc-100 cursor-pointer border-b last:border-0"
-                        onClick={() => handleProductSelect(p)}
-                      >
-                        <div className="font-bold">{p.productName}</div>
-                        <div className="text-zinc-500 flex justify-between">
-                          <span>Adet: {p.quantity}</span>
-                          <span>{p.cashPrice} ₺</span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-4 text-center text-xs text-zinc-400">Ürün bulunamadı</div>
-                  )}
-                </div>
-              )}
+          <div className="relative mt-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
+              <Input
+                placeholder={excelProducts.length > 0 ? "Ürün adı ara ve ekle..." : "Önce Excel yükleyin"}
+                value={searchTerm}
+                disabled={excelProducts.length === 0}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowDropdown(true);
+                }}
+                onFocus={() => setShowDropdown(true)}
+                className="pl-9 h-9 rounded-none text-sm"
+              />
             </div>
-          )}
+            {showDropdown && searchTerm && (
+              <div className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 shadow-lg max-h-60 overflow-auto">
+                {filteredProducts.length > 0 ? (
+                  filteredProducts.map((p, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2 text-xs hover:bg-zinc-100 cursor-pointer border-b last:border-0 group flex items-center justify-between"
+                      onClick={() => handleProductSelect(p)}
+                    >
+                      <div>
+                        <div className="font-bold">{p.productName}</div>
+                        <div className="text-zinc-500">{p.cashPrice} ₺ / {p.installmentPrice} ₺</div>
+                      </div>
+                      <Plus className="w-4 h-4 text-blue-500 opacity-0 group-hover:opacity-100" />
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-xs text-zinc-400">Ürün bulunamadı</div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* SEÇİLEN ÜRÜNLER LİSTESİ */}
+        {data.tableRows.length > 0 && (
+          <div className="space-y-2">
+            <Label className="text-[10px] uppercase font-bold text-zinc-400">Eklenen Ürünler ({data.tableRows.length}/5)</Label>
+            <div className="space-y-1">
+              {data.tableRows.map((row, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2 bg-zinc-50 border border-zinc-200 text-[11px]">
+                  <div className="truncate flex-1 pr-2">
+                    <span className="font-bold text-zinc-700">{row.productName}</span>
+                    <span className="ml-2 text-zinc-400">x{row.quantity}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-bold">{row.cashPrice} ₺</span>
+                    <button onClick={() => removeRow(idx)} className="text-zinc-300 hover:text-red-500 transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <Separator />
 
         <div className="space-y-4">
-          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">3. Manuel Düzenleme</Label>
+          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">3. Başlık ve Toplam Fiyatlar</Label>
           <div className="grid gap-2">
-            <Label htmlFor="productTitle" className="text-[10px] uppercase font-bold text-zinc-400">Siyah Bar Yazısı</Label>
-            <Input id="productTitle" name="productTitle" value={data.productTitle} onChange={handleChange} className="rounded-none h-9 text-sm" />
+            <Label htmlFor="productTitle" className="text-[10px] uppercase font-bold text-zinc-400">Siyah Bar Başlığı</Label>
+            <Input id="productTitle" name="productTitle" value={data.productTitle} onChange={handleManualChange} className="rounded-none h-9 text-sm" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="totalCashPrice" className="text-[10px] uppercase font-bold text-zinc-400">Üst Peşin</Label>
-              <Input id="totalCashPrice" name="totalCashPrice" value={data.totalCashPrice} onChange={handleChange} className="rounded-none h-9 text-sm" />
+              <Label htmlFor="totalCashPrice" className="text-[10px] uppercase font-bold text-zinc-400">Toplam Peşin</Label>
+              <Input id="totalCashPrice" name="totalCashPrice" value={data.totalCashPrice} onChange={handleManualChange} className="rounded-none h-9 text-sm" />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="totalInstallmentPrice" className="text-[10px] uppercase font-bold text-zinc-400">Üst Taksit</Label>
-              <Input id="totalInstallmentPrice" name="totalInstallmentPrice" value={data.totalInstallmentPrice} onChange={handleChange} className="rounded-none h-9 text-sm" />
+              <Label htmlFor="totalInstallmentPrice" className="text-[10px] uppercase font-bold text-zinc-400">Toplam Taksit</Label>
+              <Input id="totalInstallmentPrice" name="totalInstallmentPrice" value={data.totalInstallmentPrice} onChange={handleManualChange} className="rounded-none h-9 text-sm" />
             </div>
           </div>
         </div>
 
-        <Separator />
-
-        <div className="space-y-4">
-          <Label className="text-[10px] uppercase font-bold text-[#9f2732]">4. Tablo Detayları</Label>
-          <div className="grid gap-2">
-            <Label htmlFor="tableProductName" className="text-[10px] uppercase font-bold text-zinc-400">Tablo Ürün Adı</Label>
-            <Input id="tableProductName" name="tableProductName" value={data.tableProductName} onChange={handleChange} className="rounded-none h-9 text-sm" />
-          </div>
-          
-          <div className="grid grid-cols-3 gap-2">
-            <div className="grid gap-2">
-              <Label htmlFor="quantity" className="text-[10px] uppercase font-bold text-zinc-400">Adet</Label>
-              <Input id="quantity" name="quantity" value={data.quantity} onChange={handleChange} className="rounded-none h-9 text-sm" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="tableCashPrice" className="text-[10px] uppercase font-bold text-zinc-400">Peşin</Label>
-              <Input id="tableCashPrice" name="tableCashPrice" value={data.tableCashPrice} onChange={handleChange} className="rounded-none h-9 text-sm" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="tableInstallmentPrice" className="text-[10px] uppercase font-bold text-zinc-400">Taksit</Label>
-              <Input id="tableInstallmentPrice" name="tableInstallmentPrice" value={data.tableInstallmentPrice} onChange={handleChange} className="rounded-none h-9 text-sm" />
-            </div>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
