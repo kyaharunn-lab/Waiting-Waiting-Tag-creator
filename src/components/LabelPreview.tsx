@@ -11,21 +11,19 @@ interface LabelPreviewProps {
 
 const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
   return (
-    <div className="label-preview-container bg-white border border-gray-100">
-      {/* Üst Kırmızı Bölüm - Görsel Alanı */}
-      <div className="header-shape flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl w-full h-full flex items-center justify-center relative overflow-hidden">
-          {data.productImage ? (
-            <img 
-              src={data.productImage} 
-              alt="Ürün" 
-              className="w-full h-full object-contain object-center" 
-            />
-          ) : (
-            /* Görsel yüklenmediğinde tamamen boş beyaz alan */
-            null
-          )}
-        </div>
+    <div className="label-preview-container bg-white border border-gray-100 flex flex-col shadow-none print:shadow-none">
+      {/* Üst Görsel Alanı - Tamamen Temiz ve Beyaz */}
+      <div className="w-full h-[220px] bg-white flex items-center justify-center overflow-hidden shrink-0 border-b border-gray-50">
+        {data.productImage ? (
+          <img 
+            src={data.productImage} 
+            alt="Ürün" 
+            className="w-full h-full object-contain object-center block" 
+          />
+        ) : (
+          /* Görsel yokken bomboş beyaz alan */
+          <div className="w-full h-full bg-white" />
+        )}
       </div>
 
       {/* Ana İçerik Alanı */}
