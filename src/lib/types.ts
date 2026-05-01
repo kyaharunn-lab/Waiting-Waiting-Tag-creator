@@ -10,13 +10,14 @@ export interface LabelData {
   gen: string;
   der: string;
   yuk: string;
+  productImage?: string; // Kullanıcının yükleyebileceği görsel için
 }
 
 export const initialLabelData: LabelData = {
   productTitle: "DELFİN KOLTUK TAKIMI (3+3+B)",
   totalCashPrice: "90.000",
   totalInstallmentPrice: "120.000",
-  tableProductName: "DELFİN 3'lü Koltuk",
+  tableProductName: "DELFİN 3'LU KOLTUK",
   quantity: "1",
   tableCashPrice: "90.000",
   tableInstallmentPrice: "120.000",

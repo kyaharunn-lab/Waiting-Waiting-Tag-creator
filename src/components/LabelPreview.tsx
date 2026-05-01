@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -10,115 +11,108 @@ interface LabelPreviewProps {
 
 const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
   return (
-    <div className="label-preview-container flex flex-col h-full bg-white relative">
-      {/* Üst Kırmızı Alan - Büyük Daire Formu */}
-      <div className="relative h-[42%] w-full overflow-hidden">
-        <div className="absolute top-[-55%] left-[-15%] w-[130%] aspect-square bg-[#A11D21] rounded-full flex flex-col items-center justify-end pb-24">
-           {/* Logo Grubu */}
-           <div className="flex flex-col items-center mb-8">
-              <h1 className="font-headline text-[10rem] font-bold tracking-tighter leading-none text-white italic">vize</h1>
-              <p className="font-headline text-3xl tracking-[0.5em] font-semibold uppercase text-white/90 -mt-4">home</p>
-           </div>
-        </div>
-
-        {/* Mobilya İllüstrasyon Alanı (Kırmızı alanın üzerine biniyor) */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[85%] z-20">
-          <div className="bg-white p-4 rounded-xl shadow-2xl border border-gray-100 flex items-center justify-center">
-             <div className="bg-[#A11D21]/5 w-full p-8 rounded-lg flex items-center justify-center">
-                <Sofa size={160} className="text-[#A11D21]" strokeWidth={1} />
-             </div>
-             {/* Lamba Aksesuarı */}
-             <div className="absolute -left-6 bottom-0 hidden lg:flex flex-col items-center">
-                <div className="w-10 h-12 bg-white rounded shadow-sm border border-gray-100"></div>
-                <div className="w-1 h-24 bg-[#4A201B]"></div>
-             </div>
-          </div>
+    <div className="label-preview-container bg-white border border-gray-100">
+      {/* Üst Kırmızı Bölüm */}
+      <div className="header-shape flex items-center justify-center p-8">
+        <div className="bg-white rounded-2xl w-full h-full flex items-center justify-center shadow-md relative overflow-hidden">
+          {data.productImage ? (
+            <img src={data.productImage} alt="Ürün" className="w-full h-full object-contain p-4" />
+          ) : (
+            <Sofa size={120} className="text-[#A11D21]" strokeWidth={1.5} />
+          )}
         </div>
       </div>
 
-      {/* Ana Bilgi Alanı */}
-      <div className="flex-1 flex flex-col px-10 pt-16 pb-6 space-y-8">
-        {/* Ürün İsmi */}
-        <div className="text-center">
-          <h2 className={`font-headline uppercase font-black text-[#1A1A1A] tracking-tight leading-none transition-all duration-300 ${
-            data.productTitle.length > 30 ? 'text-4xl' : data.productTitle.length > 20 ? 'text-5xl' : 'text-6xl'
+      {/* Ana İçerik Alanı */}
+      <div className="flex-1 flex flex-col items-center px-8 pt-8 pb-4">
+        {/* Başlık */}
+        <div className="text-center w-full mb-4">
+          <h2 className={`font-black uppercase text-[#1A1A1A] tracking-tighter leading-none mb-4 ${
+            data.productTitle.length > 30 ? 'text-4xl' : 'text-5xl'
           }`}>
             {data.productTitle || "Ürün Başlığı"}
           </h2>
-          <div className="w-32 h-2 bg-[#A11D21] mx-auto mt-6 rounded-full"></div>
+          <div className="w-24 h-1.5 bg-[#A11D21] mx-auto rounded-full"></div>
         </div>
 
-        {/* Fiyatlar - Çok Daha Büyük ve Belirgin */}
-        <div className="grid grid-cols-2 gap-0 border-y border-gray-100 py-4">
-          <div className="flex flex-col items-center border-r border-gray-100">
-            <span className="text-gray-400 font-bold uppercase tracking-[0.25em] text-xs mb-1">Peşin Fiyat</span>
-            <div className="flex items-start gap-1 text-[#A11D21]">
-              <span className="text-8xl font-headline font-black tracking-tighter tabular-nums">
-                {data.totalCashPrice || "0"}
-              </span>
-              <span className="text-4xl font-black mt-3">₺</span>
+        {/* Fiyatlar - Devasa */}
+        <div className="grid grid-cols-2 w-full border-b border-gray-100 pb-4 mb-4">
+          <div className="flex flex-col items-center border-r border-gray-100 px-4">
+            <span className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">Peşin Fiyat</span>
+            <div className="flex items-start text-[#A11D21] font-black">
+              <span className="text-7xl tracking-tighter tabular-nums leading-none">{data.totalCashPrice}</span>
+              <span className="text-2xl mt-1 ml-0.5">₺</span>
             </div>
           </div>
-          <div className="flex flex-col items-center">
-            <span className="text-gray-400 font-bold uppercase tracking-[0.25em] text-xs mb-1">Taksitli Fiyat</span>
-            <div className="flex items-start gap-1 text-[#A11D21]">
-              <span className="text-8xl font-headline font-black tracking-tighter tabular-nums">
-                {data.totalInstallmentPrice || "0"}
-              </span>
-              <span className="text-4xl font-black mt-3">₺</span>
+          <div className="flex flex-col items-center px-4">
+            <span className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">Taksitli Fiyat</span>
+            <div className="flex items-start text-[#A11D21] font-black">
+              <span className="text-7xl tracking-tighter tabular-nums leading-none">{data.totalInstallmentPrice}</span>
+              <span className="text-2xl mt-1 ml-0.5">₺</span>
             </div>
           </div>
         </div>
 
-        {/* Detay Tablosu */}
-        <div className="flex-1">
-          <table className="w-full">
+        {/* Tablo */}
+        <div className="w-full flex-1 overflow-hidden">
+          <table className="w-full border-collapse">
             <thead>
-              <tr className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] border-b border-gray-50">
-                <th className="pb-3 text-left">Ürün Detayı</th>
-                <th className="pb-3 text-center">Adet</th>
-                <th className="pb-3 text-center">Peşin</th>
-                <th className="pb-3 text-center">Taksit</th>
-                <th className="pb-3 text-right">Ölçüler (G/D/Y)</th>
+              <tr className="text-[9px] text-gray-400 font-black uppercase tracking-[0.3em]">
+                <th className="py-2 text-left">Ürün Detayı</th>
+                <th className="py-2 text-center">Adet</th>
+                <th className="py-2 text-center">Peşin</th>
+                <th className="py-2 text-center">Taksit</th>
+                <th className="py-2 text-right">Ölçüler (G/D/Y)</th>
               </tr>
             </thead>
-            <tbody className="text-sm">
-              <tr className="text-[#1A1A1A] font-bold uppercase">
-                <td className="py-4 text-base">{data.tableProductName}</td>
-                <td className="py-4 text-center text-lg">{data.quantity}</td>
-                <td className="py-4 text-center tabular-nums text-lg">{data.tableCashPrice} ₺</td>
-                <td className="py-4 text-center tabular-nums text-lg">{data.tableInstallmentPrice} ₺</td>
-                <td className="py-4 text-right font-mono text-base">{data.gen}x{data.der}x{data.yuk}</td>
+            <tbody>
+              <tr className="text-[#1A1A1A] font-bold text-xs uppercase border-t border-gray-50">
+                <td className="py-4 text-sm w-1/3 leading-tight">{data.tableProductName}</td>
+                <td className="py-4 text-center font-black text-sm">{data.quantity}</td>
+                <td className="py-4 text-center">
+                  <div className="flex flex-col">
+                    <span className="text-sm">{data.tableCashPrice}</span>
+                    <span className="text-[10px]">₺</span>
+                  </div>
+                </td>
+                <td className="py-4 text-center">
+                   <div className="flex flex-col">
+                    <span className="text-sm">{data.tableInstallmentPrice}</span>
+                    <span className="text-[10px]">₺</span>
+                  </div>
+                </td>
+                <td className="py-4 text-right font-black text-sm tracking-tighter">
+                  {data.gen}x{data.der}x{data.yuk}
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Alt Kırmızı Şerit ve Logolar */}
-      <div className="bg-[#A11D21] text-white h-24 px-12 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-10">
-          <div className="flex flex-col items-center">
-             <div className="flex gap-1 mb-1">
-               <div className="w-5 h-5 bg-white/20 rounded-full"></div>
-               <div className="w-5 h-5 bg-white/40 rounded-full -ml-3"></div>
+      {/* Alt Bar - Logolar */}
+      <div className="bg-[#A11D21] h-20 w-full px-6 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+           <div className="flex flex-col items-center">
+             <div className="flex -space-x-2">
+               <div className="w-4 h-4 rounded-full bg-white/20"></div>
+               <div className="w-4 h-4 rounded-full bg-white/40"></div>
              </div>
-             <span className="text-[10px] font-black uppercase tracking-tighter">mastercard</span>
-          </div>
-          <div className="text-3xl font-black italic tracking-tighter">VISA</div>
-          <div className="flex flex-col items-center">
-             <div className="text-[12px] font-black uppercase leading-none">American</div>
-             <div className="text-[12px] font-black uppercase leading-none">Express</div>
-          </div>
-          <div className="text-2xl font-black italic tracking-tighter">troy</div>
+             <span className="text-[7px] text-white/80 font-bold uppercase mt-0.5">mastercard</span>
+           </div>
+           <div className="text-xl text-white font-black italic tracking-tighter">VISA</div>
+           <div className="text-[10px] text-white font-black uppercase leading-none text-center">
+             American<br/>Express
+           </div>
+           <div className="text-lg text-white font-black italic tracking-tighter">troy</div>
         </div>
-        
-        <div className="flex items-center gap-4 border-l border-white/20 pl-10">
-          <Handshake size={36} className="text-white/90" />
-          <div className="flex flex-col">
-            <span className="text-[14px] font-black uppercase tracking-widest leading-none">Elden Taksit</span>
-            <span className="text-[11px] font-medium uppercase opacity-70 tracking-widest mt-1">İmkanı</span>
-          </div>
+
+        <div className="flex items-center gap-3 border-l border-white/20 pl-6 h-10">
+           <Handshake className="text-white/90" size={24} />
+           <div className="flex flex-col text-white">
+             <span className="text-[12px] font-black uppercase leading-none tracking-wider">Elden Taksit</span>
+             <span className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-80 mt-0.5">İmkanı</span>
+           </div>
         </div>
       </div>
     </div>
