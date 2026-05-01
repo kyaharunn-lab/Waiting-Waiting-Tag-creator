@@ -43,7 +43,7 @@ export default function Home() {
 
       {/* Main Panel - Preview */}
       <main className="flex-1 p-8 md:p-12 overflow-auto flex items-start justify-center print:p-0 print:bg-white">
-        <div className="flex flex-col items-center gap-6 print:w-full">
+        <div className="flex flex-col items-center gap-6 print:w-full print:m-0">
              <div className="w-[148mm] flex justify-between items-end px-2 print:hidden mb-2">
                <div>
                  <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Canlı Önizleme</h2>
@@ -62,7 +62,9 @@ export default function Home() {
              </div>
              
              {/* A5 Preview Component */}
-             <LabelPreview data={labelData} />
+             <div className="print:m-0">
+                <LabelPreview data={labelData} />
+             </div>
         </div>
       </main>
     </div>
