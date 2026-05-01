@@ -53,9 +53,11 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
   const formatTurkishNumber = (val: any): string => {
     if (val === undefined || val === null || val === '') return '';
-    let cleanVal = val.toString().replace(/\s/g, '');
+    let cleanVal = val.toString().replace(/\s/g, '').replace('₺', '');
     if (cleanVal.includes(',')) {
       cleanVal = cleanVal.replace(/\./g, '').replace(',', '.');
+    } else {
+      cleanVal = cleanVal.replace(/\./g, '');
     }
     const num = parseFloat(cleanVal);
     if (isNaN(num)) return val.toString();
@@ -64,6 +66,23 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
       maximumFractionDigits: 0,
     }).format(num);
   };
+
+  const parsePrice = (val: string | undefined): number => {
+    if (!val) return 0;
+    const cleanVal = val.toString()
+      .replace(/[₺\s\.]/g, '')
+      .replace(',', '.');
+    return parseFloat(cleanVal) || 0;
+  };
+
+  const tableTotals = useMemo(() => {
+    return data.tableRows.reduce((acc, row) => {
+      return {
+        cash: acc.cash + parsePrice(row.cashPrice),
+        installment: acc.installment + parsePrice(row.installmentPrice)
+      };
+    }, { cash: 0, installment: 0 });
+  }, [data.tableRows]);
 
   const handleManualChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -90,8 +109,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         
-        // Use header: 1 to get arrays of rows for reliable index-based access
-        // A=0 (Name), B=1 (Ignored), C=2 (Peşin), D=3 (Taksit)
         const dataRows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
         
         if (dataRows.length < 2) {
@@ -471,7 +488,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         <Separator />
 
-        {/* 4. Manuel Toplam Fiyatlar */}
+        {/* 4. Manuel Başlık ve Fiyatlar */}
         <div className="space-y-4">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">3. Başlık ve Toplam Fiyatlar</Label>
           <div className="grid gap-2">
@@ -510,6 +527,32 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
               />
             </div>
           </div>
+        </div>
+
+        {/* 5. Otomatik Tablo Toplamı */}
+        <div className="space-y-3 p-4 bg-zinc-100/50 border border-zinc-200 animate-in fade-in zoom-in-95">
+          <div className="flex items-center gap-2">
+            <Label className="text-[10px] uppercase font-bold text-zinc-500">TABLO TOPLAMI (Otomatik)</Label>
+            <Badge variant="outline" className="text-[8px] font-bold text-zinc-400 border-zinc-300 bg-white">Bilgi</Badge>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <span className="text-[9px] uppercase font-bold text-zinc-400">Toplam Peşin</span>
+              <div className="text-sm font-bold text-zinc-800 tabular-nums">
+                {formatTurkishNumber(tableTotals.cash)} ₺
+              </div>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[9px] uppercase font-bold text-zinc-400">Toplam Taksit</span>
+              <div className="text-sm font-bold text-zinc-800 tabular-nums">
+                {formatTurkishNumber(tableTotals.installment)} ₺
+              </div>
+            </div>
+          </div>
+          <Separator className="bg-zinc-200" />
+          <p className="text-[8px] text-zinc-400 italic font-medium leading-tight">
+            * Tablo satırlarındaki tutarların toplamıdır. Üstteki manuel büyük fiyat alanlarını etkilemez.
+          </p>
         </div>
 
       </CardContent>
