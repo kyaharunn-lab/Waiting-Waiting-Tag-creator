@@ -14,7 +14,7 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
       className="a5-container relative bg-white overflow-hidden shadow-none border border-zinc-200 print:border-none font-sans select-none"
       style={{ width: '148mm', height: '210mm' }}
     >
-      {/* 1. ARKA PLAN ŞABLONU (User Uploaded Template) */}
+      {/* 1. ARKA PLAN ŞABLONU (Template Background) */}
       {data.productImage && (
         <img 
           src={data.productImage} 
@@ -23,7 +23,7 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
         />
       )}
 
-      {/* 2. DİNAMİK EDİTLENEBİLİR KATMAN (Overlay Layer) */}
+      {/* 2. DİNAMİK İÇERİK KATMANI (Overlay Layer) */}
       <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
         
         {/* ÜRÜN BAŞLIĞI - Siyah Bar */}
@@ -57,12 +57,12 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
           </div>
         </div>
 
-        {/* TABLO ALANI - Excel Formatında (5 Satır Sabit) */}
+        {/* TABLO ALANI - Dinamik Satır Sayısı */}
         <div 
-          className="absolute left-[7.8%] right-[7.8%]" 
+          className="absolute left-[7.8%] right-[7.8%] max-h-[40%] overflow-y-auto" 
           style={{ top: '56.2%' }}
         >
-          <table className="w-full border-collapse text-[11px] font-bold text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
+          <table className="w-full border-collapse text-[11px] font-bold text-black bg-white/40" style={{ fontFamily: 'Arial, sans-serif' }}>
             <thead>
               <tr className="bg-[#d8d0cc]">
                 <th className="border-[1.5px] border-black h-[22px] text-center uppercase px-1" style={{ width: '50%' }}>ÜRÜN</th>
@@ -72,26 +72,22 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
               </tr>
             </thead>
             <tbody>
-              {/* Dinamik Veri Satırları (Max 5) */}
-              {Array.from({ length: 5 }).map((_, i) => {
-                const row = data.tableRows[i];
-                return (
-                  <tr key={i}>
-                    <td className="border-[1.5px] border-black h-[30px] px-2 text-left truncate bg-white/40">
-                      {row?.productName || ""}
-                    </td>
-                    <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">
-                      {row?.quantity || ""}
-                    </td>
-                    <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">
-                      {row?.cashPrice || ""}
-                    </td>
-                    <td className="border-[1.5px] border-black h-[30px] text-center bg-white/40">
-                      {row?.installmentPrice || ""}
-                    </td>
-                  </tr>
-                );
-              })}
+              {data.tableRows.map((row, index) => (
+                <tr key={index}>
+                  <td className="border-[1.5px] border-black h-[24px] px-2 text-left truncate">
+                    {row.productName}
+                  </td>
+                  <td className="border-[1.5px] border-black h-[24px] text-center">
+                    {row.quantity}
+                  </td>
+                  <td className="border-[1.5px] border-black h-[24px] text-center">
+                    {row.cashPrice}
+                  </td>
+                  <td className="border-[1.5px] border-black h-[24px] text-center">
+                    {row.installmentPrice}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

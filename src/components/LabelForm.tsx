@@ -24,7 +24,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
   const formatTurkishNumber = (val: any): string => {
     if (val === undefined || val === null || val === '') return '';
-    // Temizleme: Noktaları kaldır, virgülü noktaya çevir
     const cleanVal = val.toString().replace(/\./g, '').replace(',', '.');
     const num = parseFloat(cleanVal);
     if (isNaN(num)) return val.toString();
@@ -80,15 +79,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
   };
 
   const handleProductSelect = (product: ExcelProduct) => {
-    if (data.tableRows.length >= 5) {
-      toast({
-        variant: "destructive",
-        title: "Limit Aşıldı",
-        description: "En fazla 5 ürün ekleyebilirsiniz.",
-      });
-      return;
-    }
-
     const newRows = [
       ...data.tableRows,
       {
@@ -99,7 +89,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
       }
     ];
 
-    // Otomatik toplam hesaplama kaldırıldı, sadece satırlar güncelleniyor
     onChange({
       ...data,
       tableRows: newRows
@@ -110,8 +99,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
   const removeRow = (index: number) => {
     const newRows = data.tableRows.filter((_, i) => i !== index);
-    
-    // Otomatik toplam hesaplama kaldırıldı, sadece satırlar güncelleniyor
     onChange({
       ...data,
       tableRows: newRows
@@ -208,7 +195,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         {/* SEÇİLEN ÜRÜNLER LİSTESİ */}
         {data.tableRows.length > 0 && (
           <div className="space-y-2">
-            <Label className="text-[10px] uppercase font-bold text-zinc-400">Eklenen Ürünler ({data.tableRows.length}/5)</Label>
+            <Label className="text-[10px] uppercase font-bold text-zinc-400">Eklenen Ürünler ({data.tableRows.length})</Label>
             <div className="space-y-1">
               {data.tableRows.map((row, idx) => (
                 <div key={idx} className="flex items-center justify-between p-2 bg-zinc-50 border border-zinc-200 text-[11px]">
