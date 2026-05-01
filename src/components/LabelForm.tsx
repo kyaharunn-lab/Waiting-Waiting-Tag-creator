@@ -22,14 +22,11 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Fiyat formatlama: 3415,00 -> 3.415
   const formatTurkishNumber = (val: any): string => {
     if (val === undefined || val === null || val === '') return '';
     
-    // Excel'den gelen "3415,00" string'ini veya sayısını temizle
-    let cleanVal = val.toString().replace(/\s/g, ''); // Boşlukları kaldır
+    let cleanVal = val.toString().replace(/\s/g, '');
     
-    // Eğer virgül varsa (Türkçe format), noktaya çevirip parse et
     if (cleanVal.includes(',')) {
       cleanVal = cleanVal.replace(/\./g, '').replace(',', '.');
     }
@@ -37,7 +34,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
     const num = parseFloat(cleanVal);
     if (isNaN(num)) return val.toString();
 
-    // Binlik ayırıcı (nokta) ekle, ondalık kısmını at (eğer tam sayıysa veya ,00 ise)
     return new Intl.NumberFormat('tr-TR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
@@ -74,17 +70,16 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         
-        // JSON olarak oku
         const dataJson: any[] = XLSX.utils.sheet_to_json(ws);
         
         // Vize Excel Kolon Eşleşmesi:
         // A: "Ürün Adı"
-        // B: "Miktar" (veya ADET)
         // C: "Kredi Katı Satıs Fiyat"
         // D: "1+7 Ay Taksit Fiyat"
+        // Adet her zaman 1 olarak sabitlendi.
         const products: ExcelProduct[] = dataJson.map(row => ({
           productName: row["Ürün Adı"] || row["ÜRÜN ADI"] || "",
-          quantity: row["Miktar"] || row["ADET"] || row["Adet"] || "1",
+          quantity: "1",
           cashPrice: formatTurkishNumber(row["Kredi Katı Satıs Fiyat"] || row["FİTA1"] || ""),
           installmentPrice: formatTurkishNumber(row["1+7 Ay Taksit Fiyat"] || row["FİYAT2"] || "")
         })).filter(p => p.productName);
@@ -104,7 +99,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
       ...data.tableRows,
       {
         productName: product.productName,
-        quantity: product.quantity.toString(),
+        quantity: "1",
         cashPrice: product.cashPrice,
         installmentPrice: product.installmentPrice,
       }
@@ -137,7 +132,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
       </CardHeader>
       <CardContent className="p-4 space-y-6">
         
-        {/* ŞABLON YÜKLEME ALANI */}
         <div className="space-y-3">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">1. Şablon Görseli Yükle (A5)</Label>
           {!data.productImage ? (
@@ -161,7 +155,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         <Separator />
 
-        {/* EXCEL YÜKLEME VE ÜRÜN SEÇME */}
         <div className="space-y-3">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Ürün Ekle (Vize Excel)</Label>
           <div className="flex gap-2">
@@ -213,7 +206,6 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
           </div>
         </div>
 
-        {/* SEÇİLEN ÜRÜNLER LİSTESİ */}
         {data.tableRows.length > 0 && (
           <div className="space-y-2">
             <Label className="text-[10px] uppercase font-bold text-zinc-400">Eklenen Ürünler ({data.tableRows.length})</Label>
