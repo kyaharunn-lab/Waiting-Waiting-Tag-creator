@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -54,14 +55,14 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
               <Upload className="w-8 h-8 mx-auto text-zinc-300 mb-2" />
-              <p className="text-[10px] text-zinc-400 font-medium">Logolu ve boş tablolu şablon görselini buraya bırakın veya tıklayın</p>
+              <p className="text-[10px] text-zinc-400 font-medium">Logolu ve boş tablolu şablon görselini buraya yükleyin</p>
             </div>
           ) : (
             <div className="relative border border-zinc-200 p-2 bg-white flex items-center gap-4">
-              <img src={data.productImage} className="w-16 h-20 object-cover border" alt="Şablon" />
+              <img src={data.productImage} className="w-12 h-16 object-cover border" alt="Şablon" />
               <div className="flex-1">
                 <p className="text-[10px] font-bold text-green-600 uppercase">Şablon Yüklendi</p>
-                <p className="text-[9px] text-zinc-400">Görsel sağdaki önizlemede arka plan olarak ayarlandı.</p>
+                <p className="text-[9px] text-zinc-400">Arka plan olarak ayarlandı.</p>
               </div>
               <Button variant="ghost" size="icon" onClick={removeImage} className="h-8 w-8 text-zinc-400 hover:text-red-500">
                 <X className="w-4 h-4" />
