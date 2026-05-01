@@ -16,9 +16,16 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
       <div className="header-shape flex items-center justify-center p-8">
         <div className="bg-white rounded-2xl w-full h-full flex items-center justify-center shadow-md relative overflow-hidden">
           {data.productImage ? (
-            <img src={data.productImage} alt="Ürün" className="w-full h-full object-contain p-4" />
+            <img 
+              src={data.productImage} 
+              alt="Ürün" 
+              className="w-full h-full object-contain p-4" 
+            />
           ) : (
-            <Sofa size={120} className="text-[#A11D21]" strokeWidth={1.5} />
+            <div className="flex flex-col items-center gap-2 opacity-20">
+              <Sofa size={120} className="text-[#A11D21]" strokeWidth={1} />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#A11D21]">Görsel Yok</span>
+            </div>
           )}
         </div>
       </div>
@@ -91,7 +98,7 @@ const LabelPreview: React.FC<LabelPreviewProps> = ({ data }) => {
       </div>
 
       {/* Alt Bar - Logolar */}
-      <div className="bg-[#A11D21] h-20 w-full px-6 flex items-center justify-between">
+      <div className="bg-[#A11D21] h-20 w-full px-6 flex items-center justify-between mt-auto">
         <div className="flex items-center gap-6">
            <div className="flex flex-col items-center">
              <div className="flex -space-x-2">

@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ImagePlus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ImagePlus, X } from 'lucide-react';
 
 interface LabelFormProps {
   data: LabelData;
@@ -24,11 +25,18 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        onChange({ ...data, productImage: reader.result as string });
+      reader.onload = (event) => {
+        const result = event.target?.result;
+        if (typeof result === 'string') {
+          onChange({ ...data, productImage: result });
+        }
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleRemoveImage = () => {
+    onChange({ ...data, productImage: undefined });
   };
 
   return (
@@ -51,21 +59,34 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
           <div className="grid gap-2">
             <Label className="text-xs uppercase font-bold text-gray-400">Ürün Görseli (Opsiyonel)</Label>
-            <div className="flex items-center gap-4">
-              <label htmlFor="image-upload" className="flex-1 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-                <div className="flex flex-col items-center gap-2">
-                  <ImagePlus className="w-6 h-6 text-gray-400" />
-                  <span className="text-xs text-gray-500">Görsel Yükle</span>
-                </div>
-                <input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-              </label>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <label htmlFor="image-upload" className="flex-1 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <div className="flex flex-col items-center gap-2">
+                    <ImagePlus className="w-5 h-5 text-gray-400" />
+                    <span className="text-xs text-gray-500 font-medium">
+                      {data.productImage ? "Görseli Değiştir" : "Görsel Yükle"}
+                    </span>
+                  </div>
+                  <input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                </label>
+                
+                {data.productImage && (
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={handleRemoveImage}
+                    className="h-12 w-12 border-red-100 text-red-500 hover:bg-red-50 hover:text-red-600"
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                )}
+              </div>
+              
               {data.productImage && (
-                <button 
-                  onClick={() => onChange({ ...data, productImage: undefined })}
-                  className="text-[10px] text-red-500 font-bold uppercase"
-                >
-                  Kaldır
-                </button>
+                <div className="relative w-20 h-20 border rounded-md overflow-hidden bg-gray-50 flex items-center justify-center">
+                  <img src={data.productImage} alt="Form Önizleme" className="max-w-full max-h-full object-contain" />
+                </div>
               )}
             </div>
           </div>
