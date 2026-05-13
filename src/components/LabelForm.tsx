@@ -51,6 +51,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
   const cleanAndFormatExcelPrice = (val: any): string => {
     if (val === undefined || val === null || val === '') return '';
+    // Handle formats like 3415,00
     let cleanVal = val.toString().replace(/\s/g, '').replace('₺', '');
     if (cleanVal.includes(',')) {
       cleanVal = cleanVal.split(',')[0].replace(/\./g, '');
@@ -96,6 +97,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         
+        // Read headers to find columns
         const dataRows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
         
         if (dataRows.length < 2) {
@@ -107,6 +109,10 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
           return;
         }
 
+        // Vize Format Mapping:
+        // A (0) -> Ürün Adı
+        // C (2) -> Peşin Fiyat
+        // D (3) -> Taksitli Fiyat
         const products: ExcelProduct[] = dataRows.slice(1).map(row => {
           const name = row[0] || "";
           const cash = row[2] || "";
@@ -257,6 +263,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
       </CardHeader>
       <CardContent className="p-4 space-y-6 overflow-visible">
         
+        {/* Şablon Yükleme */}
         <div className="space-y-3">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">1. Şablon Görseli Yükle (A5)</Label>
           {!data.productImage ? (
@@ -283,6 +290,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         <Separator />
 
+        {/* Excel Yükleme ve Arama */}
         <div className="space-y-3">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">2. Vize Excel Ürün Seçimi</Label>
           
@@ -378,7 +386,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
                   </Button>
                 </div>
 
-                <ScrollArea className="flex-1">
+                <div className="overflow-y-auto max-h-[350px] scrollbar-thin scrollbar-thumb-zinc-200">
                   <div className="p-0">
                     {filteredProducts.length > 0 ? (
                       filteredProducts.map((p, idx) => {
@@ -435,12 +443,13 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
                       </div>
                     )}
                   </div>
-                </ScrollArea>
+                </div>
               </div>
             )}
           </div>
         </div>
 
+        {/* Eklenen Ürünler Listesi */}
         {data.tableRows.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -454,7 +463,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
                 TÜMÜNÜ TEMİZLE
               </Button>
             </div>
-            <div className="space-y-1 max-h-[300px] overflow-auto pr-1">
+            <div className="space-y-1 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-200">
               {data.tableRows.map((row, idx) => (
                 <div key={idx} className="flex flex-col p-2.5 bg-white border border-zinc-200 group hover:border-[#9f2732]/30 transition-all">
                   <div className="flex items-center justify-between gap-2">
@@ -495,6 +504,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
 
         <Separator />
 
+        {/* Manuel Fiyat Girişleri */}
         <div className="space-y-4">
           <Label className="text-[10px] uppercase font-bold text-[#9f2732]">3. Başlık ve Toplam Fiyatlar</Label>
           <div className="grid gap-2">
@@ -535,6 +545,7 @@ const LabelForm: React.FC<LabelFormProps> = ({ data, onChange }) => {
           </div>
         </div>
 
+        {/* Otomatik Toplam Bölümü */}
         <div className="space-y-3 p-4 bg-zinc-100/50 border border-zinc-200 animate-in fade-in zoom-in-95">
           <div className="flex items-center gap-2">
             <Label className="text-[10px] uppercase font-bold text-zinc-500">TABLO TOPLAMI (Otomatik)</Label>
